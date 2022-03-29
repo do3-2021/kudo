@@ -1,0 +1,64 @@
+name: Bug Report
+description: Report a bug
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for opening this issue!
+
+  - type: dropdown
+    id: feature-branch-or-main
+    attributes:
+      label: Is it a team issue or a project issue ?
+      options:
+        - Team issue
+        - Project issue
+      multiple: false
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-teams
+    attributes:
+      label: Which teams are related to the bug?
+      options:
+        - Cluster client
+        - Cluster controller
+        - Cluster scheduler
+        - Node agent
+        - Networking
+      multiple: true
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Please provide a way to reproduce the bug
+
+  - type: textarea
+    id: exception-or-error
+    attributes:
+      label: Please provide the exception or error you saw
+      render: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Please provide the environment you discovered this bug in
+      render: true
+      placeholder: |
+        Version / branche / tag
+
+  - type: textarea
+    id: other
+    attributes:
+      label: Anything else?

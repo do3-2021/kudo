@@ -1,0 +1,62 @@
+name: Feature request
+description: Describes a new feature
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for opening this issue!
+
+  - type: dropdown
+    id: feature-branch-or-main
+    attributes:
+      label: Is it a team issue or a project issue ?
+      options:
+        - Team issue
+        - Project issue
+      multiple: false
+    validations:
+      required: true
+
+
+  - type: dropdown
+    id: affected-teams
+    attributes:
+      label: Which teams are related to the feature request?
+      options:
+        - Cluster client
+        - Cluster controller
+        - Cluster scheduler
+        - Node agent
+        - Networking
+      multiple: true
+    validations:
+      required: true
+
+  - type: textarea
+    id: 
+    attributes:
+      label: What is the problem you're trying to solve?
+      description: Clear and concise description of what the probem is.
+      placeholder: Creating a new resource is not yet possible
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks-list
+    attributes:
+      label: Task list
+      description: Please provide a task list for this issue.
+      value: |
+        - [ ]
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: anything-else
+    attributes:
+      label: Anything else ?
+      description: Is there anything more you would like to add ?
+      
