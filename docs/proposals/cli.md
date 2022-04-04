@@ -125,7 +125,19 @@ Delete and stop an instance.
 Create a workload definition
 
 **Flags** :
-`--file <file> | -f <file>` : add workload definition from file.
+
+| Name  | Shorthand | Values | Default | Description                        |
+| ----- | --------- | ------ | ------- | ---------------------------------- |
+| files | f         | Path   | `''`    | add workload definition from file. |
+
+
+**Examples :**
+
+- Add workload from file
+  
+  ```sh
+  kudoctl create workload -f workload.yml
+  ```
 
 ---
 
