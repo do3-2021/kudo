@@ -1,0 +1,53 @@
+syntax "proto3";
+package node_agent;
+
+// Represents an Instance (eg. a container, VM ...)
+message Instance {
+  string id = 1;
+  string name = 2;
+  Type type = 3;
+  State state = 4;
+  string uri = 5;
+  []string environement = 6;
+  Resource resource = 7;
+  []string ports = 8;
+  string ip = 9;
+}
+
+// Represents a summary of all necessary resources
+message ResourceSummary {
+	int cpu = 1;
+	int memory = 2;
+	int disk = 3;
+}
+
+// Represent the maximum/usage of a Instance or a Node
+message Resource {
+	ResourceSummary max = 1;
+	ResourceSummary usage = 2;
+}
+
+
+// Represents a Instance action message
+message InstanceAction {
+	string id = 1;
+	Action action = 2;
+}
+
+// Represents the different Instance actions possible
+enum Action {
+	START = 0;
+	STOP = 1;
+	DESTROY = 2;
+	KILL = 3;
+}
+
+// Represents the different Type of a workflow
+enum Type {
+    CONTAINER = 0;
+}
+
+service SchedulerService {
+    rpc InstanceCreate (Instance) returns (google.protobuf.Empty) {}
+    rpc InstanceUpdate (InstanceAction) returns (google.protobuf.Empty) {}
+}
