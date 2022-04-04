@@ -36,108 +36,98 @@ kudoctl is the official cli client implementation for kudo.
 
 Command format : `kudoctl [global options] <command> [command options]`.
 
-___
+---
 
 ### get nodes
 
 Get a list of the nodes registered to the control plane.
 
-**Parameters** :  
+**Flags** :
 
-`--help | -h` : show help of the function
+| Name     | Shorthand | Values               | Default        | Description                |
+| -------- | --------- | -------------------- | -------------- | -------------------------- |
+| `--help` | `-h`      |                      | false          | show help of the function. |
+| `--fmt`  |           | json, human-readable | human-readable | set format.                |
 
 **Examples** :
 
 TODO
 
-___
+---
 
 ### get node \<id\>
 
 Get detailed informations about a node.
 
-**Arguments** :  
+**Arguments** :
 
 `id` : the id of the node
 
-**Parameters** :  
+**Flags** :
 
-`--help | -h` : show help of the function.  
-`--fmt={json|xml}` : set format of the output.
-``
+| Name     | Shorthand | Values               | Default        | Description                |
+| -------- | --------- | -------------------- | -------------- | -------------------------- |
+| `--help` | `-h`      |                      | false          | show help of the function. |
+| `--fmt`  |           | json, human-readable | human-readable | set format.                |
 
-**Examples** :  
+**Examples** :
 
 TODO
 
-___
+---
 
 ### get workloads
 
-___
+---
 
 ### get workload \<id\>
 
-Get the workload definition
-
-**Arguments** :  
-
-`id` : the id of the workload
-
-**Parameters** :  
-
-`--help | -h` : show help of the function.  
-`--format [json|yml]` : set the output format to json or yaml (yaml by default)
-
-**Examples** :  
-
-TODO
-___
+---
 
 ### get instances
 
 Get the list of instances and the name of the workload.
 
-___
+---
 
 ### get instance \<id\>
 
 Get details about the instance.
 
-**Arguments** :  
+**Arguments** :
 
 `id` : the id of the instance
 
-___
+---
 
 ### delete workload \<id\>
 
 Delete a workload definition.
 
-**Arguments** :  
+**Arguments** :
 
 `id` : the id of the workload
 
-___
+---
 
 ### delete instance \<id\>
 
 Delete and stop an instance.
 
-**Arguments** :  
+**Arguments** :
 
 `id` : the id of the instance
 
-___
+---
 
 ### create workload
 
 Create a workload definition
 
-**Parameters** :
+**Flags** :
 `--file <file> | -f <file>` : add workload definition from file.
 
-___
+---
 
 ## instantiate workload \<id\>
 
