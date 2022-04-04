@@ -37,6 +37,7 @@ kudoctl is the official cli client implementation for kudo.
 Command format : `kudoctl [global options] <command> [command options]`.
 
 ___
+
 ### get nodes
 
 Get a list of the nodes registered to the control plane.
@@ -62,12 +63,14 @@ Get detailed informations about a node.
 **Parameters** :  
 
 `--help | -h` : show help of the function.  
-`--fmt` : set format TODO: add formats.  
+`--fmt={json|xml}` : set format of the output.
+``
 
 **Examples** :  
 
 TODO
-____
+
+___
 
 ### get workloads
 
@@ -75,26 +78,71 @@ ___
 
 ### get workload \<id\>
 
+Get the workload definition
+
+**Arguments** :  
+
+`id` : the id of the workload
+
+**Parameters** :  
+
+`--help | -h` : show help of the function.  
+`--format [json|yml]` : set the output format to json or yaml (yaml by default)
+
+**Examples** :  
+
+TODO
 ___
 
 ### get instances
+
+Get the list of instances and the name of the workload.
 
 ___
 
 ### get instance \<id\>
 
+Get details about the instance.
+
+**Arguments** :  
+
+`id` : the id of the instance
+
 ___
 
 ### delete workload \<id\>
+
+Delete a workload definition.
+
+**Arguments** :  
+
+`id` : the id of the workload
 
 ___
 
 ### delete instance \<id\>
 
+Delete and stop an instance.
+
+**Arguments** :  
+
+`id` : the id of the instance
+
 ___
 
 ### create workload
 
+Create a workload definition
+
+**Parameters** :
+`--file <file> | -f <file>` : add workload definition from file.
+
 ___
 
 ## instantiate workload \<id\>
+
+Instantiate and start a workload
+
+**Arguments** :
+
+`id` : the id of the workload
