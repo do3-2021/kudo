@@ -10,6 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Add labels
-        uses: do3-2021/kudo-team-parser-action@v2
+        uses: do3-2021/kudo-team-parser-action@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
