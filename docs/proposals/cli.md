@@ -4,13 +4,13 @@ kudoctl is the official cli client implementation for kudo.
 
 ## Global options
 
-| short        | long                        | description                                                          |
-| ------------ | --------------------------- | -------------------------------------------------------------------- |
-| `-V`         | `--version`                 | output the version of the client TODO : define version format.       |
-| `-h`         | `--help`                    | display the help text.                                               |
-| `-c <path>`  | `--config <path>`           | specify the path to the config file.                                 |
-|              | `--host <ip>`               | specify the ip of the control plane to connect to.                   |
-| `-v <level>` | `--verbosity-level <level>` | Set the verbosity level of the execution, see **Log format** section |
+| Name                        | Shorthand    | Description                                                          |
+| --------------------------- | ------------ | -------------------------------------------------------------------- |
+| `--version`                 | `-V`         | output the version of the client TODO : define version format.       |
+| `--help`                    | `-h`         | display the help text.                                               |
+| `--config <path>`           | `-c <path>`  | specify the path to the config file.                                 |
+| `--host <ip>`               |              | specify the ip of the control plane to connect to.                   |
+| `--verbosity-level <level>` | `-v <level>` | Set the verbosity level of the execution, see **Log format** section |
 
 ## Exit codes
 
@@ -44,10 +44,14 @@ Get a list of the nodes registered to the control plane.
 
 **Flags** :
 
-| Name     | Shorthand | Values               | Default        | Description                |
-| -------- | --------- | -------------------- | -------------- | -------------------------- |
-| `--help` | `-h`      |                      | false          | show help of the function. |
-| `--fmt`  |           | json, human-readable | human-readable | set format.                |
+| Name             | Shorthand | Values                                          | Default | Description                                                                                                                                                      |
+| ---------------- | --------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--help`         | `-h`      |                                                 | false   | show help of the function.                                                                                                                                       |
+| `-format`        | `-fmt`    | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output.                                                                                                                              |
+| `-verbose`       | `-v`      |                                                 | false   | Specifies whether to enable verbose mode. Use the default value of off to disable verbose mode. This option is the default value. Use on to enable verbose mode. |
+| `-page`          | `-p`      |                                                 | false   | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
+| `-rows <number>` | `-r`      |                                                 | 24      | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
+| `-header`        | `-hdr`    |                                                 | true    | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
 
 **Examples** :
 
@@ -65,10 +69,10 @@ Get detailed information about a node.
 
 **Flags** :
 
-| Name     | Shorthand | Values               | Default        | Description                |
-| -------- | --------- | -------------------- | -------------- | -------------------------- |
-| `--help` | `-h`      |                      | false          | show help of the function. |
-| `--fmt`  |           | json, human-readable | human-readable | set format.                |
+| Name      | Shorthand | Values                                          | Default | Description                         |
+| --------- | --------- | ----------------------------------------------- | ------- | ----------------------------------- |
+| `--help`  | `-h`      |                                                 | false   | show help of the function.          |
+| `-format` | `-fmt`    | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output. |
 
 **Examples** :
 
@@ -77,6 +81,21 @@ TODO
 ---
 
 ### get workloads
+
+Get a list of the workloads...
+
+<!-- TODO: more description -->
+
+**Flags** :
+
+| Name             | Shorthand | Values                                          | Default | Description                                                                                                                                                      |
+| ---------------- | --------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--help`         | `-h`      |                                                 | false   | show help of the function.                                                                                                                                       |
+| `-format`        | `-fmt`    | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output.                                                                                                                              |
+| `-verbose`       | `-v`      |                                                 | false   | Specifies whether to enable verbose mode. Use the default value of off to disable verbose mode. This option is the default value. Use on to enable verbose mode. |
+| `-page`          | `-p`      |                                                 | false   | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
+| `-rows <number>` | `-r`      |                                                 | 24      | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
+| `-header`        | `-hdr`    |                                                 | true    | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
 
 ---
 
@@ -87,6 +106,17 @@ TODO
 ### get instances
 
 Get the list of instances and the name of the workload.
+
+**Flags** :
+
+| Name             | Shorthand | Values                                          | Default | Description                                                                                                                                                      |
+| ---------------- | --------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--help`         | `-h`      |                                                 | false   | show help of the function.                                                                                                                                       |
+| `-format`        | `-fmt`    | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output.                                                                                                                              |
+| `-verbose`       | `-v`      |                                                 | false   | Specifies whether to enable verbose mode. Use the default value of off to disable verbose mode. This option is the default value. Use on to enable verbose mode. |
+| `-page`          | `-p`      |                                                 | false   | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
+| `-rows <number>` | `-r`      |                                                 | 24      | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
+| `-header`        | `-hdr`    |                                                 | true    | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
 
 ---
 
@@ -130,11 +160,10 @@ Create a workload definition
 | ----- | --------- | ------ | ------- | ---------------------------------- |
 | files | f         | Path   | `''`    | add workload definition from file. |
 
-
 **Examples :**
 
 - Add workload from file
-  
+
   ```sh
   kudoctl create workload -f workload.yml
   ```
