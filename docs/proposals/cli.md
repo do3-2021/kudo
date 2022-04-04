@@ -16,7 +16,7 @@ kudoctl is the official cli client implementation for kudo.
 
 | Code | Category             | Description                                                                      |
 | ---- | -------------------- | -------------------------------------------------------------------------------- |
-| 0    | Sucess               | The command was successful.                                                      |
+| 0    | Success              | The command was successful.                                                      |
 | 2    | Syntax error         | The syntax of the command was not correct.                                       |
 | 3    | Connection error     | A connectivity error or protocol error occurred.                                 |
 | 4    | Server error         | An error occurred during a call to the controller.                               |
@@ -57,7 +57,7 @@ TODO
 
 ### get node \<id\>
 
-Get detailed informations about a node.
+Get detailed information about a node.
 
 **Arguments** :
 
