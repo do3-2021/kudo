@@ -36,42 +36,65 @@ kudoctl is the official cli client implementation for kudo.
 
 Command format : `kudoctl [global options] <command> [command options]`.
 
+___
 ### get nodes
 
 Get a list of the nodes registered to the control plane.
 
 **Parameters** :  
-**--help | -h** : show help of the function
+
+`--help | -h` : show help of the function
 
 **Examples** :
+
 TODO
+
+___
 
 ### get node \<id\>
 
 Get detailed informations about a node.
 
 **Arguments** :  
-**id** : the id of the node
+
+`id` : the id of the node
 
 **Parameters** :  
-**--help | -h** : show help of the function.  
-**--fmt** : set format TODO: add formats.  
+
+`--help | -h` : show help of the function.  
+`--fmt` : set format TODO: add formats.  
 
 **Examples** :  
+
 TODO
+____
 
 ### get workloads
 
+___
+
 ### get workload \<id\>
+
+___
 
 ### get instances
 
+___
+
 ### get instance \<id\>
+
+___
 
 ### delete workload \<id\>
 
+___
+
 ### delete instance \<id\>
+
+___
 
 ### create workload
 
-### instantiate workload \<id\>
+___
+
+## instantiate workload \<id\>
