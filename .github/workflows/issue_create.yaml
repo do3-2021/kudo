@@ -1,0 +1,15 @@
+name: Add labels to new issues
+
+on:
+  issues: 
+    types:
+      - opened
+
+jobs:
+  labeling:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add labels
+        uses: do3-2021/kudo-team-parser-action@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
