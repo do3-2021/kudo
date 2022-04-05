@@ -28,4 +28,5 @@ message Empty {}
 service Networking {
     rpc CreateInterface(CreateInterfaceRequest) returns (CreateInterfaceResponse) {}
     rpc DeleteInterface(DeleteInterfaceRequest) returns (Empty) {}
+    rpc CreateContainerNetworkInterface(CreateContainerNetworkInterfaceRequest) returns (CreateContainerNetworkInterfaceResponse) {}
 }
