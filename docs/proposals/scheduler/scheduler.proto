@@ -35,6 +35,7 @@ message Instance {
     [] string environnement = 6;
     Resource resource = 7;
     [] string ports = 8;
+    string ip = 9;
 }
 
 message ResourceSummary {
@@ -74,6 +75,7 @@ message NodeRegisterRequest {
 message NodeRegisterResponse {
     int code = 1;
     string description = 2;
+    string subnet = 3;
 }
 
 service AgentService {
