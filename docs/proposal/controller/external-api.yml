@@ -1,0 +1,643 @@
+openapi: 3.0.1
+info:
+  title: 🛠️ KUDO External API (WIP)
+  description: |
+    External API for the KUDO project. This API is divided into 2 parts : 
+       
+    `Workload` : Configuration of a desired instance state  
+      
+    `Instance` : Running VM/container/binary
+  license:
+    name: MIT
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: https://localhost/kudo/api/v0
+tags:
+  - name: instance
+    description: Everything about instances
+  - name: workload
+    description: Description of different workloads
+paths:
+  /workload/:
+    get:
+      tags:
+        - workload
+      summary: Get a list of stored workloads
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: number
+        - name: offset
+          in: query
+          schema:
+            type: number
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+              - CONTAINER
+      responses:
+        200:
+          description: List of workloads stored
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: object
+                    description: Total number of workload registered
+                  workloads:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Workload"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+    put:
+      tags:
+        - workload
+      summary: Create a workload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Workload"
+      responses:
+        201:
+          description: Id of the created workload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Id of the created workload
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+  /workload/{id}:
+    get:
+      tags:
+        - workload
+      summary: Get detailled information about a workload
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Information about the workload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workload"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        404:
+          description: Workload not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        412:
+          description: Resources doesn't meet conditions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+    patch:
+      tags:
+        - workload
+      summary: Update a workload
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Workload"
+      responses:
+        200:
+          description: Id of the updated workload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Id of the updated workload
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        404:
+          description: Workload not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+    delete:
+      tags:
+        - workload
+      summary: Delete a workload
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Id of the deleted workload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Id of the deleted workload
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        404:
+          description: Workload not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+  /instance/:
+    get:
+      tags:
+        - instance
+      summary: Get a list of registered instances inside the cluster
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: number
+        - name: offset
+          in: query
+          schema:
+            type: number
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+              - CONTAINER
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum:
+              - RUNNING
+              - STARTING
+              - STOPPED
+              - STOPPING
+              - DESTROYING
+              - TERMINATED
+              - CRASHED
+              - FAILED
+              - SCHEDULING
+              - SCHEDULED
+      responses:
+        200:
+          description: List of instances in the cluster
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: number
+                    description: Total number of instances registered
+                  instances:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Instance"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+    put:
+      tags:
+        - instance
+      summary: Create an instance
+      parameters:
+        - name: workloadId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: Id of the created instance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Id of the created instance
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+  /instance/{id}:
+    get:
+      tags:
+        - instance
+      summary: Get detailled information about an instance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Information about the instance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Instance"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        404:
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+    patch:
+      tags:
+        - instance
+      summary: Update an instance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: workloadId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Id of the updated instance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Id of the updated instance
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        404:
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+    delete:
+      tags:
+        - instance
+      summary: Delete an instance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Id of the deleted instance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Id of the deleted instance
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        404:
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+components:
+  schemas:
+    Workload:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of the workload
+        name:
+          type: string
+          description: Name of the workload
+        type:
+          type: string
+          description: Type of the workload
+          enum:
+            - CONTAINER
+        uri:
+          type: string
+          description: URI from where to fetch the resource
+        ports:
+          type: array
+          description: Ports to expose
+          items:
+            type: string
+        env:
+          type: array
+          description: Environment variables
+          items:
+            type: string
+        resources:
+          type: object
+          description: Resources to allocate
+          properties:
+            cpu:
+              type: string
+              description: Number of CPU
+            memory:
+              type: string
+              description: Memory in MB
+            storage:
+              type: string
+              description: Storage in GB
+    Instance:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of the instance
+        name:
+          type: string
+          description: Name of the instance
+        type:
+          type: string
+          description: Type of the workload
+          enum:
+            - CONTAINER
+        uri:
+          type: string
+          description: URI from where to fetch the resource
+        ports:
+          type: array
+          items:
+            type: string
+          description: Ports to expose
+        env:
+          type: array
+          items:
+            type: string
+          description: Environment variables
+        resources:
+          type: object
+          description: Resources to allocate
+          properties:
+            cpu:
+              type: string
+              description: Number of CPU
+            memory:
+              type: string
+              description: Memory in MB
+            storage:
+              type: string
+              description: Storage in GB
+        status:
+          type: string
+          description: Status of the instance
+          enum:
+            - RUNNING
+            - STARTING
+            - STOPPED
+            - STOPPING
+            - DESTROYING
+            - TERMINATED
+            - CRASHED
+            - FAILED
+            - SCHEDULING
+            - SCHEDULED
