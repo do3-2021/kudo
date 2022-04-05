@@ -2,15 +2,15 @@
 
 kudoctl is the official cli client implementation for kudo.
 
-## Global options
+## Global flags
 
-| Name                        | Shorthand    | Description                                                          |
-| --------------------------- | ------------ | -------------------------------------------------------------------- |
-| `--version`                 | `-V`         | output the version of the client TODO : define version format.       |
-| `--help`                    | `-h`         | display the help text.                                               |
-| `--config <path>`           | `-c <path>`  | specify the path to the config file.                                 |
-| `--host <ip>`               |              | specify the ip of the control plane to connect to.                   |
-| `--verbosity-level <level>` | `-v <level>` | Set the verbosity level of the execution, see **Log format** section |
+| Name                        | Shorthand    |            | Default        | Description                                                          |
+| --------------------------- | ------------ | ---------- | -------------- | -------------------------------------------------------------------- |
+| `--version`                 | `-V`         | bool       | false          | output the version of the client TODO : define version format.       |
+| `--help`                    | `-h`         | bool       | false          | display the help text.                                               |
+| `--config <path>`           | `-c <path>`  | path       | ~/.kudo/config | specify the path to the config file.                                 |
+| `--host <ip>`               |              | string     | `''`           | specify the ip of the control plane to connect to.                   |
+| `--verbosity-level <level>` | `-v <level>` | int 0 to 3 | 2              | Set the verbosity level of the execution, see **Log format** section |
 
 ## Exit codes
 
