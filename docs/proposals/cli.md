@@ -101,6 +101,17 @@ Get a list of the workloads...
 
 ### get workload \<id\>
 
+This function returns the definition of a workload with the specified `id`.
+
+**Arguments :**  
+
+`id` : the id of the instance.
+
+**Flags :**  
+
+| Name     | Shorthand | Values              | Default | Description                                                            |
+| -------- | --------- | ------------------- | ------- | ---------------------------------------------------------------------- |
+| --format |           | `json`,`yaml`,`yml` | `yaml`  | The output format of the workload definition,  yml is the same as yaml |
 ---
 
 ### get instances
@@ -132,7 +143,7 @@ Get details about the instance.
 
 ### delete workload \<id\>
 
-Delete a workload definition.
+Delete a workload definition.On success the command outputs no information.
 
 **Arguments** :
 
@@ -142,7 +153,7 @@ Delete a workload definition.
 
 ### delete instance \<id\>
 
-Delete and stop an instance.
+Delete and stop an instance. On success the command outputs no information.
 
 **Arguments** :
 
@@ -156,9 +167,9 @@ Create a workload definition
 
 **Flags** :
 
-| Name  | Shorthand | Values | Default | Description                        |
-| ----- | --------- | ------ | ------- | ---------------------------------- |
-| files | f         | Path   | `''`    | add workload definition from file. |
+| Name    | Shorthand | Values | Default | Description                        |
+| ------- | --------- | ------ | ------- | ---------------------------------- |
+| --files | -f        | Path   | `''`    | add workload definition from file. |
 
 **Examples :**
 
@@ -167,6 +178,10 @@ Create a workload definition
   ```sh
   kudoctl create workload -f workload.yml
   ```
+
+### apply
+
+This command takes the same arguments as `create workload`, creates a workload, then instanciate it.
 
 ---
 
