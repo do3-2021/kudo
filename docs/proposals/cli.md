@@ -164,13 +164,14 @@ Delete and stop an instance. On success the command outputs no information.
 
 ### create workload
 
-Create a workload definition
+Create a workload definition. By default if a workload with the same name exists, the workload will be updated, add the `--no-update` flag if you don’t want this behavior.
 
 **Flags** :
 
-| Name    | Shorthand | Values | Default | Description                        |
-| ------- | --------- | ------ | ------- | ---------------------------------- |
-| --files | -f        | Path   | `''`    | add workload definition from file. |
+| Name        | Shorthand | Values | Default | Description                                    |
+| ----------- | --------- | ------ | ------- | ---------------------------------------------- |
+| --files     | -f        | Path   | `''`    | add workload definition from file.             |
+| --no-update |           | bool   | false   | If the workload doesn’t exist, don’t update it |
 
 **Examples :**
 
