@@ -144,7 +144,7 @@ Get details about the instance.
 
 ### delete workload \<id\>
 
-Delete a workload definition.On success the command outputs no information.
+Delete a workload definition and all the instances of this workload. On success the command outputs no information.
 
 **Arguments** :
 
