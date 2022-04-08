@@ -168,7 +168,7 @@ Create a resource definition. By default if a resource with the same name exists
 
 **Arguments :**
 
-`kind` : the kind of the ressource, possible values :
+`kind` : the kind of the resource, possible values :
 
 - workload
 
@@ -208,16 +208,16 @@ This command takes the same arguments as `create <kind>` except the kind is defi
 
 **Flags :**
 
-| Name   | Shorthand | Values | Default      | Description    |
-| ------ | --------- | ------ | ------------ | -------------- |
-| --kind |           | string | `"workload"` | ressource kind |
+| Name   | Shorthand | Values | Default      | Description   |
+| ------ | --------- | ------ | ------------ | ------------- |
+| --kind |           | string | `"workload"` | resource kind |
 
 ---
 
-## instantiate \<ressource-id\>
+## instantiate \<resource-id\>
 
 Instantiate and start a resource
 
 **Arguments** :
 
-`ressource-id` : the id of the resource
+`resource-id` : the id of the resource
