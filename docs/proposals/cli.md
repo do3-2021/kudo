@@ -4,13 +4,13 @@ kudoctl is the official cli client implementation for kudo.
 
 ## Global flags
 
-| Name                        | Shorthand    |            | Default        | Description                                                          |
-| --------------------------- | ------------ | ---------- | -------------- | -------------------------------------------------------------------- |
-| `--version`                 | `-V`         | bool       | false          | output the version of the client TODO : define version format.       |
-| `--help`                    | `-h`         | bool       | false          | display the help text.                                               |
-| `--config <path>`           | `-c <path>`  | path       | ~/.kudo/config | specify the path to the config file.                                 |
-| `--host <ip>`               |              | string     | `''`           | specify the ip of the control plane to connect to.                   |
-| `--verbosity-level <level>` | `-v <level>` | int 0 to 3 | 2              | Set the verbosity level of the execution, see **Log format** section |
+| Name              | Shorthand | Values     | Default        | Description                                                          |
+| ----------------- | --------- | ---------- | -------------- | -------------------------------------------------------------------- |
+| --version         | -V        | bool       | false          | output the version of the client TODO : define version format.       |
+| --help            | -h        | bool       | false          | display the help text.                                               |
+| --config          | -c        | path       | ~/.kudo/config | specify the path to the config file.                                 |
+| --host            |           | string     | `''`           | specify the ip of the control plane to connect to.                   |
+| --verbosity-level | -v        | int 0 to 3 | 2              | Set the verbosity level of the execution, see **Log format** section |
 
 ## Exit codes
 
@@ -45,14 +45,14 @@ Get a list of the nodes registered to the control plane.
 
 **Flags** :
 
-| Name              | Shorthand | Values                                          | Default | Description                                                                                                                                                      |
-| ----------------- | --------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--help`          | `-h`      |                                                 | false   | show help of the function.                                                                                                                                       |
-| `--format`        | `-F`      | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output.                                                                                                                              |
-| `--verbose`       | `-v`      |                                                 | false   | Specifies whether to enable verbose mode. Use the default value of off to disable verbose mode. This option is the default value. Use on to enable verbose mode. |
-| `--page`          | `-p`      |                                                 | false   | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
-| `--rows <number>` | `-r`      |                                                 | 24      | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
-| `--header`        | `-hdr`    |                                                 | true    | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
+| Name      | Shorthand | Values                                                  | Default     | Description                                                                                                                                                      |
+| --------- | --------- | ------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| --help    | -h        |                                                         | false       | show help of the function.                                                                                                                                       |
+| --format  | -F        | `"json"`, `"default"`, `"xml"`, `"delimit <character>"` | `"default"` | Specifies the format of the output.                                                                                                                              |
+| --verbose | -v        |                                                         | false       | Specifies whether to enable verbose mode. Use the default value of off to disable verbose mode. This option is the default value. Use on to enable verbose mode. |
+| --page    | -p        |                                                         | false       | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
+| --rows    | -r        | integer                                                 | 24          | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
+| --header  | -h        |                                                         | true        | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
 
 **Examples** :
 
@@ -70,10 +70,10 @@ Get detailed information about a node.
 
 **Flags** :
 
-| Name       | Shorthand | Values                                          | Default | Description                         |
-| ---------- | --------- | ----------------------------------------------- | ------- | ----------------------------------- |
-| `--help`   | `-h`      |                                                 | false   | show help of the function.          |
-| `--format` | `-F`      | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output. |
+| Name     | Shorthand | Values                                                  | Default     | Description                         |
+| -------- | --------- | ------------------------------------------------------- | ----------- | ----------------------------------- |
+| --help   | -h        |                                                         | false       | show help of the function.          |
+| --format | -F        | `"json"`, `"default"`, `"xml"`, `"delimit <character>"` | `"default"` | Specifies the format of the output. |
 
 **Examples** :
 
@@ -89,14 +89,14 @@ Get a list of the resources...
 
 **Flags** :
 
-| Name              | Shorthand | Values                                          | Default | Description                                                                                                                                                      |
-| ----------------- | --------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--help`          | `-h`      |                                                 | false   | show help of the function.                                                                                                                                       |
-| `--format`        | `-F`      | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output.                                                                                                                              |
-| `--verbose`       | `-v`      |                                                 | false   | Specifies whether to enable verbose mode. Use the default value of off to disable verbose mode. This option is the default value. Use on to enable verbose mode. |
-| `--page`          | `-p`      |                                                 | false   | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
-| `--rows <number>` | `-r`      |                                                 | 24      | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
-| `--header`        | `-hdr`    |                                                 | true    | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
+| Name      | Shorthand | Values                                                  | Default     | Description                                                                                                                                                      |
+| --------- | --------- | ------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| --help    | -h        |                                                         | false       | show help of the function.                                                                                                                                       |
+| --format  | -F        | `"json"`, `"default"`, `"xml"`, `"delimit <character>"` | `"default"` | Specifies the format of the output.                                                                                                                              |
+| --verbose | -v        |                                                         | false       | Specifies whether to enable verbose mode. Use the default value of off to disable verbose mode. This option is the default value. Use on to enable verbose mode. |
+| --page    | -p        |                                                         | false       | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
+| --rows    | -r        | integer                                                 | 24          | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
+| --header  | -h        |                                                         | true        | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
 
 ---
 
@@ -110,9 +110,9 @@ This function returns the definition of a resource with the specified `id`.
 
 **Flags :**  
 
-| Name      | Shorthand | Values              | Default | Description                                                            |
-| --------- | --------- | ------------------- | ------- | ---------------------------------------------------------------------- |
-| ---format |           | `json`,`yaml`,`yml` | `yaml`  | The output format of the resource definition,  yml is the same as yaml |
+| Name      | Shorthand | Values                    | Default  | Description                                                            |
+| --------- | --------- | ------------------------- | -------- | ---------------------------------------------------------------------- |
+| ---format |           | `"json"`,`"yaml"`,`"xml"` | `"yaml"` | The output format of the resource definition,  yml is the same as yaml |
 ---
 
 ### get instances
@@ -121,14 +121,14 @@ Get the list of instances and the name of the resource.
 
 **Flags** :
 
-| Name              | Shorthand | Values                                          | Default | Description                                                                                                                                                      |
-| ----------------- | --------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--help`          | `-h`      |                                                 | false   | show help of the function.                                                                                                                                       |
-| `--format`        | `-F`      | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output.                                                                                                                              |
-| `--verbose`       | `-v`      |                                                 | false   | Specifies whether to enable verbose mode. Use the default value of off to disable verbose mode. This option is the default value. Use on to enable verbose mode. |
-| `--page`          | `-p`      |                                                 | false   | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
-| `--rows <number>` | `-r`      |                                                 | 24      | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
-| `--header`        | `-hdr`    |                                                 | true    | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
+| Name      | Shorthand | Values                                                  | Default     | Description                                                                                                                                                      |
+| --------- | --------- | ------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| --help    | -h        |                                                         | false       | show help of the function.                                                                                                                                       |
+| --format  | -F        | `"json"`, `"default"`, `"xml"`, `"delimit <character>"` | `"default"` | Specifies the format of the output.                                                                                                                              |
+| --verbose | -v        |                                                         | false       | Specifies whether to enable verbose mode. Use the default value of off to disable verbose mode. This option is the default value. Use on to enable verbose mode. |
+| --page    | -p        |                                                         | false       | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
+| --rows    | -r        | integer                                                 | 24          | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
+| --header  | -h        |                                                         | true        | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
 
 ---
 
@@ -178,7 +178,7 @@ Create a resource definition. By default if a resource with the same name exists
 | ----------- | --------- | ------ | ------- | ----------------------------------------------- |
 | --file      | -f        | Path   | `""`    | add resource definition from file.              |
 | --no-update |           | bool   | false   | If the resource already exists, don’t update it |
-| --name      |           | string | ""      | set the name of the resource                    |
+| --name      |           | string | `""`    | set the name of the resource                    |
 
 **Kind specific flags :**
 
@@ -187,7 +187,7 @@ Create a resource definition. By default if a resource with the same name exists
 | Name             | Shorthand | Values   | Default       | Description                                                                           |
 | ---------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------------------- |
 | --type           |           | string   | `"container"` | workload type                                                                         |
-| --uri            |           | string   | ""            | the uri                                                                               |
+| --uri            |           | string   | `""`          | the uri                                                                               |
 | --resources-cpu  |           | integer  | 1             | the cpu amount                                                                        |
 | --resources-ram  |           | integer  | 50            | the ram amount      (MB)                                                              |
 | --resources-disk |           | integer  | 1             | the disk size (GB)                                                                    |
