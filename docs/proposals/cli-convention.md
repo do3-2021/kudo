@@ -1,7 +1,7 @@
 # Command Line Interface - convention
 
-
 ## Command emphasis
+
 The following typefaces are used to show command emphasis:
 
 **boldface**
@@ -9,11 +9,12 @@ The following typefaces are used to show command emphasis:
 
 **italics**
     Text in *italics* is used for variables for which you supply actual values, such as a default directory or the name of a cluster.
-    
+
 **monospace**
-    Text in monospace identifies the data or commands that you type, samples of command output, examples of program code or messages from the system, or names of command flags, parameters, arguments, and name-value pairs.
+    Text in `monospace` identifies the data or commands that you type, samples of command output, examples of program code or messages from the system, or names of command flags, parameters, arguments, and name-value pairs.
 
 ## Special characters
+
 The following special characters are used in the command descriptions:
 
 **minus sign (-)**
@@ -32,4 +33,3 @@ The following special characters are used in the command descriptions:
     Braces indicate a required choice between two or more options or arguments.
 **ellipsis (...)**
     Ellipses indicate repetition or multiple values or arguments.
-
