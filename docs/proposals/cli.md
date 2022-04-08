@@ -45,10 +45,10 @@ Get a list of the nodes registered to the control plane.
 
 **Flags** :
 
-| Name             | Shorthand | Values                                          | Default | Description                                                                                                                                                      |
-| ---------------- | --------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--help`         | `-h`      |                                                 | false   | show help of the function.                                                                                                                                       |
-| `--format`        | `-fmt`    | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output.                                                                                                                              |
+| Name              | Shorthand | Values                                          | Default | Description                                                                                                                                                      |
+| ----------------- | --------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--help`          | `-h`      |                                                 | false   | show help of the function.                                                                                                                                       |
+| `--format`        | `-F`      | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output.                                                                                                                              |
 | `--verbose`       | `-v`      |                                                 | false   | Specifies whether to enable verbose mode. Use the default value of off to disable verbose mode. This option is the default value. Use on to enable verbose mode. |
 | `--page`          | `-p`      |                                                 | false   | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
 | `--rows <number>` | `-r`      |                                                 | 24      | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
@@ -70,10 +70,10 @@ Get detailed information about a node.
 
 **Flags** :
 
-| Name      | Shorthand | Values                                          | Default | Description                         |
-| --------- | --------- | ----------------------------------------------- | ------- | ----------------------------------- |
-| `--help`  | `-h`      |                                                 | false   | show help of the function.          |
-| `--format` | `-fmt`    | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output. |
+| Name       | Shorthand | Values                                          | Default | Description                         |
+| ---------- | --------- | ----------------------------------------------- | ------- | ----------------------------------- |
+| `--help`   | `-h`      |                                                 | false   | show help of the function.          |
+| `--format` | `-F`      | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output. |
 
 **Examples** :
 
@@ -89,10 +89,10 @@ Get a list of the workloads...
 
 **Flags** :
 
-| Name             | Shorthand | Values                                          | Default | Description                                                                                                                                                      |
-| ---------------- | --------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--help`         | `-h`      |                                                 | false   | show help of the function.                                                                                                                                       |
-| `--format`        | `-fmt`    | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output.                                                                                                                              |
+| Name              | Shorthand | Values                                          | Default | Description                                                                                                                                                      |
+| ----------------- | --------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--help`          | `-h`      |                                                 | false   | show help of the function.                                                                                                                                       |
+| `--format`        | `-F`      | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output.                                                                                                                              |
 | `--verbose`       | `-v`      |                                                 | false   | Specifies whether to enable verbose mode. Use the default value of off to disable verbose mode. This option is the default value. Use on to enable verbose mode. |
 | `--page`          | `-p`      |                                                 | false   | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
 | `--rows <number>` | `-r`      |                                                 | 24      | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
@@ -110,8 +110,8 @@ This function returns the definition of a workload with the specified `id`.
 
 **Flags :**  
 
-| Name     | Shorthand | Values              | Default | Description                                                            |
-| -------- | --------- | ------------------- | ------- | ---------------------------------------------------------------------- |
+| Name      | Shorthand | Values              | Default | Description                                                            |
+| --------- | --------- | ------------------- | ------- | ---------------------------------------------------------------------- |
 | ---format |           | `json`,`yaml`,`yml` | `yaml`  | The output format of the workload definition,  yml is the same as yaml |
 ---
 
@@ -121,10 +121,10 @@ Get the list of instances and the name of the workload.
 
 **Flags** :
 
-| Name             | Shorthand | Values                                          | Default | Description                                                                                                                                                      |
-| ---------------- | --------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--help`         | `-h`      |                                                 | false   | show help of the function.                                                                                                                                       |
-| `--format`        | `-fmt`    | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output.                                                                                                                              |
+| Name              | Shorthand | Values                                          | Default | Description                                                                                                                                                      |
+| ----------------- | --------- | ----------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--help`          | `-h`      |                                                 | false   | show help of the function.                                                                                                                                       |
+| `--format`        | `-F`      | `json`, `default`, `xml`, `delimit <character>` | default | Specifies the format of the output.                                                                                                                              |
 | `--verbose`       | `-v`      |                                                 | false   | Specifies whether to enable verbose mode. Use the default value of off to disable verbose mode. This option is the default value. Use on to enable verbose mode. |
 | `--page`          | `-p`      |                                                 | false   | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
 | `--rows <number>` | `-r`      |                                                 | 24      | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |

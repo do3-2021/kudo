@@ -18,7 +18,7 @@ The following typefaces are used to show command emphasis:
 The following special characters are used in the command descriptions:
 
 **minus sign (-)**
-    Flags are prefixed with a minus sign (-). Flags define the action of a command or modify the operation of a command. You can use multiple flags, followed by parameters, when you issue a command. This character cannot be used as the first character of an object name.
+    Flags are prefixed with a minus sign (-). Flags define the action of a command or modify the operation of a command. You can use multiple flags, followed by parameters, when you issue a command. This character cannot be used as the first character of an object name. Use one minus sign before one-letter flags / short flags and two min signs before a long flag.
 
 **vertical bar ( | )**
     A vertical bar signifies that you choose only one value.
