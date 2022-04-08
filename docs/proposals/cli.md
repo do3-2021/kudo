@@ -158,29 +158,41 @@ Delete and stop an instance. On success the command outputs no information.
 
 **Arguments** :
 
-`id` : the id of the instance
+`id` : the id of the instance.
 
 ---
 
-### create resource
+### create \<kind\>
 
 Create a resource definition. By default if a resource with the same name exists, the resource will be updated, add the `--no-update` flag if you don’t want this behavior.
 
+**Arguments :**
+
+`kind` : the kind of the ressource, possible values :
+
+- workload
+
 **Flags** :
 
-| Name             | Shorthand | Values   | Default       | Description                                                                                          |
-| ---------------- | --------- | -------- | ------------- | ---------------------------------------------------------------------------------------------------- |
-| --files          | -f        | Path     | `""`          | add resource definition from file.                                                                   |
-| --no-update      |           | bool     | false         | If the resource doesn’t exist, don’t update it                                                       |
-| --kind           |           | string   | `"workload"`  | set the resource kind                                                                                |
-| --type           |           | string   | `"container"` | workload : set workload type                                                                         |
-| --name           |           | string   | ""            | set the name of the resource                                                                         |
-| --uri            |           | string   | ""            | workload : set the uri                                                                               |
-| --resources-cpu  |           | integer  | 1             | workload : set the cpu amount                                                                        |
-| --resources-ram  |           | integer  | 50            | workload : set the ram amount      (MB)                                                              |
-| --resources-disk |           | integer  | 1             | workload : set the disk size (GB)                                                                    |
-| --port           | -p        | []string | []            | workload : set ports binding list, use multiple times to add multiple elements to the array          |
-| --environment    |           | []string | []            | workload : set environment variables list, use multiple times to add multiple elements  to the array |
+| Name        | Shorthand | Values | Default | Description                                     |
+| ----------- | --------- | ------ | ------- | ----------------------------------------------- |
+| --file      | -f        | Path   | `""`    | add resource definition from file.              |
+| --no-update |           | bool   | false   | If the resource already exists, don’t update it |
+| --name      |           | string | ""      | set the name of the resource                    |
+
+**Kind specific flags :**
+
+*workload :*
+
+| Name             | Shorthand | Values   | Default       | Description                                                                           |
+| ---------------- | --------- | -------- | ------------- | ------------------------------------------------------------------------------------- |
+| --type           |           | string   | `"container"` | workload type                                                                         |
+| --uri            |           | string   | ""            | the uri                                                                               |
+| --resources-cpu  |           | integer  | 1             | the cpu amount                                                                        |
+| --resources-ram  |           | integer  | 50            | the ram amount      (MB)                                                              |
+| --resources-disk |           | integer  | 1             | the disk size (GB)                                                                    |
+| --port           | -p        | []string | []            | ports binding list, use multiple times to add multiple elements to the array          |
+| --environment    |           | []string | []            | environment variables list, use multiple times to add multiple elements  to the array |
 
 **Examples :**
 
@@ -192,14 +204,20 @@ Create a resource definition. By default if a resource with the same name exists
 
 ### apply
 
-This command takes the same arguments as `create resource`, creates a resource, then instanciate it.
+This command takes the same arguments as `create resource` except the kind is defined by the `--kind` flag , creates a resource, then instanciate it.
+
+**Flags :**
+
+| Name   | Shorthand | Values | Default      | Description    |
+| ------ | --------- | ------ | ------------ | -------------- |
+| --kind |           | string | `"workload"` | ressource kind |
 
 ---
 
-## instantiate resource \<id\>
+## instantiate \<ressource-id\>
 
 Instantiate and start a resource
 
 **Arguments** :
 
-`id` : the id of the resource
+`ressource-id` : the id of the resource
