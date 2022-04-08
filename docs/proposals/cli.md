@@ -81,9 +81,9 @@ TODO
 
 ---
 
-### get workloads
+### get resources
 
-Get a list of the workloads...
+Get a list of the resources...
 
 <!-- TODO: more description -->
 
@@ -100,9 +100,9 @@ Get a list of the workloads...
 
 ---
 
-### get workload \<id\>
+### get resource \<id\>
 
-This function returns the definition of a workload with the specified `id`.
+This function returns the definition of a resource with the specified `id`.
 
 **Arguments :**  
 
@@ -112,12 +112,12 @@ This function returns the definition of a workload with the specified `id`.
 
 | Name      | Shorthand | Values              | Default | Description                                                            |
 | --------- | --------- | ------------------- | ------- | ---------------------------------------------------------------------- |
-| ---format |           | `json`,`yaml`,`yml` | `yaml`  | The output format of the workload definition,  yml is the same as yaml |
+| ---format |           | `json`,`yaml`,`yml` | `yaml`  | The output format of the resource definition,  yml is the same as yaml |
 ---
 
 ### get instances
 
-Get the list of instances and the name of the workload.
+Get the list of instances and the name of the resource.
 
 **Flags** :
 
@@ -142,13 +142,13 @@ Get details about the instance.
 
 ---
 
-### delete workload \<id\>
+### delete resource \<id\>
 
-Delete a workload definition and all the instances of this workload. On success the command outputs no information.
+Delete a resource definition and all the instances of this resource. On success the command outputs no information.
 
 **Arguments** :
 
-`id` : the id of the workload
+`id` : the id of the resource
 
 ---
 
@@ -162,35 +162,44 @@ Delete and stop an instance. On success the command outputs no information.
 
 ---
 
-### create workload
+### create resource
 
-Create a workload definition. By default if a workload with the same name exists, the workload will be updated, add the `--no-update` flag if you don’t want this behavior.
+Create a resource definition. By default if a resource with the same name exists, the resource will be updated, add the `--no-update` flag if you don’t want this behavior.
 
 **Flags** :
 
-| Name        | Shorthand | Values | Default | Description                                    |
-| ----------- | --------- | ------ | ------- | ---------------------------------------------- |
-| --files     | -f        | Path   | `''`    | add workload definition from file.             |
-| --no-update |           | bool   | false   | If the workload doesn’t exist, don’t update it |
+| Name             | Shorthand | Values   | Default       | Description                                                                                          |
+| ---------------- | --------- | -------- | ------------- | ---------------------------------------------------------------------------------------------------- |
+| --files          | -f        | Path     | `""`          | add resource definition from file.                                                                   |
+| --no-update      |           | bool     | false         | If the resource doesn’t exist, don’t update it                                                       |
+| --kind           |           | string   | `"workload"`  | set the resource kind                                                                                |
+| --type           |           | string   | `"container"` | workload : set workload type                                                                         |
+| --name           |           | string   | ""            | set the name of the resource                                                                         |
+| --uri            |           | string   | ""            | workload : set the uri                                                                               |
+| --resources-cpu  |           | integer  | 1             | workload : set the cpu amount                                                                        |
+| --resources-ram  |           | integer  | 50            | workload : set the ram amount      (MB)                                                              |
+| --resources-disk |           | integer  | 1             | workload : set the disk size (GB)                                                                    |
+| --port           | -p        | []string | []            | workload : set ports binding list, use multiple times to add multiple elements to the array          |
+| --environment    |           | []string | []            | workload : set environment variables list, use multiple times to add multiple elements  to the array |
 
 **Examples :**
 
-- Add workload from file
+- Add resource from file
 
   ```sh
-  kudoctl create workload -f workload.yml
+  kudoctl create resource -f workload.yml
   ```
 
 ### apply
 
-This command takes the same arguments as `create workload`, creates a workload, then instanciate it.
+This command takes the same arguments as `create resource`, creates a resource, then instanciate it.
 
 ---
 
-## instantiate workload \<id\>
+## instantiate resource \<id\>
 
-Instantiate and start a workload
+Instantiate and start a resource
 
 **Arguments** :
 
-`id` : the id of the workload
+`id` : the id of the resource
