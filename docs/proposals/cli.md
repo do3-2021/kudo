@@ -204,7 +204,7 @@ Create a resource definition. By default if a resource with the same name exists
 
 ### apply
 
-This command takes the same arguments as `create resource` except the kind is defined by the `--kind` flag , creates a resource, then instanciate it.
+This command takes the same arguments as `create <kind>` except the kind is defined by the `--kind` flag , creates a resource, then instanciate it.
 
 **Flags :**
 
