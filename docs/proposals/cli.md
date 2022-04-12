@@ -54,10 +54,6 @@ Get a list of the nodes registered to the control plane.
 | --rows    | -r        | integer                                                                 | 24                 | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
 | --header  | -h        |                                                                         | true               | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
 
-**Examples** :
-
-TODO
-
 ---
 
 ### get node \<id\>
