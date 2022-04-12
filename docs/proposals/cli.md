@@ -198,6 +198,8 @@ Create a resource definition. By default if a resource with the same name exists
   ```sh
   kudoctl create resource -f workload.yml
   ```
+  
+---
 
 ### apply
 
