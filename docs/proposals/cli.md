@@ -135,7 +135,7 @@ Get details about the instance.
 
 | Name      | Shorthand | Values                                       | Default            | Description                                                            |
 | --------- | --------- | -------------------------------------------- | ------------------ | ---------------------------------------------------------------------- |
-| ---format |           | `"json"`,`"human_readable"`,`"yaml"`,`"xml"` | `"human_readable"` | The output format of the resource definition,  yml is the same as yaml |
+| --format |           | `"json"`,`"human_readable"`,`"yaml"`,`"xml"` | `"human_readable"` | The output format of the resource definition,  yml is the same as yaml |
 
 ---
 
