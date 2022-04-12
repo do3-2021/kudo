@@ -2,7 +2,7 @@
 
 A schema that can be sent to the controller in order to create a ressource.
 
-The schema is sent as JSON to the controller. When passed as a file to the client the ressource is using the YAML format with an added top level property `api_version` setting which version of the controller api to use.
+The schema is sent as JSON to the controller. When passed as a file to the client the resource is using the YAML format with an added top level property `api_version` setting which specifies the version of the controller api to use.
 
 Example :
 
