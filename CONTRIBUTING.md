@@ -6,9 +6,13 @@ Thank you for your interest in this project. In order to contribute to this proj
 
 ![Git workflow](https://i.imgur.com/WMNLhY8.jpg)
 
-This repository is a fork of ***to be updated***. All changes made to this repository are eventually going to get through a pull request of the upstream repository.
+This project is organized within 2 repositories :
+- [The main repository](https://github.com/dev-sys-do/kudo)
+- [The development repository](https://github.com/do3-2021/kudo)
 
-In this repository, you will find 3 types of branches :
+The development repository is a fork of the main repository. All changes made to this repository are eventually going to get through a pull request of the upstream ( main ) repository.
+
+In the development repository, you will find 3 types of branches :
 - The main branch
 - Team's branch
 - Features ( or bugfix ) branches
@@ -17,7 +21,7 @@ You must code in a feature branch. This feature branch will eventually end up in
 
 After accepting multiples PRs by your team's members, your team's branch will get to a point where you feel it's ready to close an issue ( more on that later ). At this point, you must open a PR from you team's branch to the main branch ( **PR 2** ). This PR must be reviewed by at least 5 reviewers before getting marked as accepted.
 
-When all the teams are satisfied with the work in the main branch, and everybody agrees on the correctness of what's been done, a new PR, from this fork to the parent repo ( **PR 3** ), will be opened to be discussed with the parent's repo maintainer. 
+When all the teams are satisfied with the work in the main branch, and everybody agrees on the correctness of what's been done, a new PR, from this fork to the parent repo ( the main repo ) ( **PR 3** ), will be opened to be discussed with the parent's repo maintainer. 
 
 ## How to commit
 
