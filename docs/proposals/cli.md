@@ -38,8 +38,7 @@ kudoctl is the official cli client implementation for kudo.
 Command format : `kudoctl [global options] <command> [command options]`.
 
 ---
-
-### get nodes
+<details> <summary><h3>get nodes</h3> </summary>
 
 Get a list of the nodes registered to the control plane.
 
@@ -53,10 +52,11 @@ Get a list of the nodes registered to the control plane.
 | --page    | -p        |                                                                         | false              | Specifies whether to display one page of text at a time or all text at one time.                                                                                 |
 | --rows    | -r        | integer                                                                 | 24                 | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
 | --header  | -h        |                                                                         | true               | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
-
+</details>
+  
 ---
 
-### get node \<id\>
+<details> <summary><h3>get node &lt;id&gt; </h3></summary>
 
 Get detailed information about a node.
 
@@ -70,11 +70,12 @@ Get detailed information about a node.
 | -------- | --------- | ------------------------------------------------------------------------ | ------------------ | ----------------------------------- |
 | --help   | -h        |                                                                          | false              | show help of the function.          |
 | --format | -F        | `"json"`,`"human_readable"`,  `"yaml"`, `"xml"`, `"delimit <character>"` | `"human_readable"` | Specifies the format of the output. |
-
+    
+</details>
 
 ---
 
-### get resources
+<details> <summary><h3>get resources</h3></summary>
 
 Get a list of the resources...
 
@@ -89,9 +90,11 @@ Get a list of the resources...
 | --rows    | -r        | integer                                                                 | 24                 | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
 | --header  | -h        |                                                                         | true               | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
 
+</details>
+  
 ---
 
-### get resource \<id\>
+<details> <summary><h3>get resource &lt;id&gt;</h3></summary>
 
 This function returns the definition of a resource with the specified `id`.
 
@@ -104,9 +107,12 @@ This function returns the definition of a resource with the specified `id`.
 | Name      | Shorthand | Values                                       | Default            | Description                                                            |
 | --------- | --------- | -------------------------------------------- | ------------------ | ---------------------------------------------------------------------- |
 | ---format |           | `"json"`,`"human_readable"`,`"yaml"`,`"xml"` | `"human_readable"` | The output format of the resource definition,  yml is the same as yaml |
+  
+</details>
+  
 ---
 
-### get instances
+<details> <summary><h3>get instances</h3></summary>
 
 Get the list of instances and the name of the resource.
 
@@ -121,9 +127,11 @@ Get the list of instances and the name of the resource.
 | --rows    | -r        | integer                                                                 | 24                 | Specifies the number of rows per page to display when the **-p** parameter is on. You can specify a value in the range 1 - 100.                                  |
 | --header  | -h        |                                                                         | true               | Specifies whether to display the table header. Use the default value of on to display the table header. Use off to hide the table header.                        |
 
+</details>
+  
 ---
 
-### get instance \<id\>
+<details> <summary><h3>get instance &lt;id&gt;</h3></summary>
 
 Get details about the instance.
 
@@ -137,9 +145,11 @@ Get details about the instance.
 | --------- | --------- | -------------------------------------------- | ------------------ | ---------------------------------------------------------------------- |
 | --format |           | `"json"`,`"human_readable"`,`"yaml"`,`"xml"` | `"human_readable"` | The output format of the resource definition,  yml is the same as yaml |
 
+</details>
+  
 ---
 
-### delete resource \<id\>
+<details> <summary><h3>delete resource &lt;id&gt;</h3></summary>
 
 Delete a resource definition and all the instances of this resource. On success the command outputs no information.
 
@@ -147,19 +157,23 @@ Delete a resource definition and all the instances of this resource. On success 
 
 `id` : the id of the resource
 
+</details>
+  
 ---
 
-### delete instance \<id\>
+<details> <summary><h3>delete instance &lt;id&gt;</h3></summary>
 
 Delete and stop an instance. On success the command outputs no information.
 
 **Arguments** :
 
 `id` : the id of the instance.
+  
+</details>
 
 ---
 
-### create \<kind\>
+<details> <summary><h3>create &lt;kind&gt;</h3></summary>
 
 Create a resource definition. By default if a resource with the same name exists, the resource will be updated, add the `--no-update` flag if you don’t want this behavior.
 
@@ -198,10 +212,12 @@ Create a resource definition. By default if a resource with the same name exists
   ```sh
   kudoctl create resource -f workload.yml
   ```
+
+</details>
   
 ---
 
-### apply
+<details> <summary><h3>apply</h3></summary>
 
 This command takes the same arguments as `create <kind>` except the kind is defined by the `--kind` flag , creates a resource, then instanciate it.
 
@@ -210,13 +226,17 @@ This command takes the same arguments as `create <kind>` except the kind is defi
 | Name   | Shorthand | Values | Default      | Description   |
 | ------ | --------- | ------ | ------------ | ------------- |
 | --kind |           | string | `"workload"` | resource kind |
+  
+</details>
 
 ---
-
-## instantiate \<resource-id\>
+  
+<details> <summary><h3>instantiate &lt;resource-id&gt;</h3></summary>
 
 Instantiate and start a resource
 
 **Arguments** :
 
 `resource-id` : the id of the resource
+
+</details>
