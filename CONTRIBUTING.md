@@ -7,10 +7,10 @@ Thank you for your interest in this project. In order to contribute to this proj
 ![Git workflow](https://i.imgur.com/WMNLhY8.jpg)
 
 This project is organized within 2 repositories :
-- [The main repository](https://github.com/dev-sys-do/kudo)
+- [The upstream repository](https://github.com/dev-sys-do/kudo)
 - [The development repository](https://github.com/do3-2021/kudo)
 
-The development repository is a fork of the main repository. All changes made to this repository are eventually going to get through a pull request of the upstream ( main ) repository.
+The development repository is a fork of the upstream repository. All changes made to this repository are eventually going to get through a pull request of the upstream repository.
 
 In the development repository, you will find 3 types of branches :
 - The main branch
@@ -21,7 +21,7 @@ You must code in a feature branch. This feature branch will eventually end up in
 
 After accepting multiples PRs by your team's members, your team's branch will get to a point where you feel it's ready to close an issue ( more on that later ). At this point, you must open a PR from you team's branch to the main branch ( **PR 2** ). This PR must be reviewed by at least 5 reviewers before getting marked as accepted.
 
-When all the teams are satisfied with the work in the main branch, and everybody agrees on the correctness of what's been done, a new PR, from this fork to the parent repo ( the main repo ) ( **PR 3** ), will be opened to be discussed with the parent's repo maintainer. 
+When all the teams are satisfied with the work in the main branch, and everybody agrees on the correctness of what's been done, a new PR, from this fork to the parent repo ( the upstream repo ) ( **PR 3** ), will be opened to be discussed with the upstream repo maintainer.
 
 ## How to commit
 
@@ -34,13 +34,13 @@ First, let's list the basic rules :
 - Try to write the commit body as **bullets** ( optional )
 - Use imperative in title ( **Add** instead of **Added**, for example )
 - Describe what and why, but not how ( the purpose, not the implementation )
-- Footer contains issue number, if applicable ( #78 )
+- Footer contains issue number, if it fixes / closes the issue. For example : `Closes #78` or `Fixes #78`
 
 > For more information about the 50/72 characters rule, please visit [this link.](https://dev.to/noelworden/improving-your-commit-message-with-the-50-72-rule-3g79#:~:text=The%2050%2F72%20Rule%20is,pulled%20out%20of%20a%20hat.)
 
 Your commits should follow the [conventional commits specification.](https://www.conventionalcommits.org/en/v1.0.0/#summary)
 
-Please be mindful of this conventionn when writing your commits. CI jobs will check if your commits follow this convention, since these commits might later be used to create changelog using parsers that understand this convention specifically.
+Please be mindful of this convention when writing your commits. CI jobs will check if your commits follow this convention, since these commits might later be used to create changelog using parsers that understand this convention specifically.
 
 ## When to make an Issue, and what's its goal ?
 An issue should be opened when new functional needs are defined, a new bug is discovered, or a documentation resource is going to be created. You **must** open an issue before opening the corresponding branch.  An issue should not be technical, and should describe what the end user will get. You open an issue when either one of the following condition is true :
@@ -52,7 +52,7 @@ An issue should be opened when new functional needs are defined, a new bug is di
 When creating a new issue, you'll be presented with 2 possibles templates. Please choose the one that fits best what you're trying to do.
 You can then follow the form.
 
-The title of the issue should contains what it is about in the least amount of words possible ( container health check )
+Try to make your issue title short and expressive
 For example : `Container health check`
 
 To describe what you will add to the program, you need to provide a tasks list. For example :
@@ -72,7 +72,7 @@ There are two kinds of PR you can make : either a feature branch you want to mer
 The title of the PR should, if possible, have the same name as its corresponding issue. Anyway, your PR title should be a very short description of what's been done in your PR.
 For example : `Container health check`.
 
-You should first give a quick explanation of your works, the technical decisions you are making / you made, and why. Don't hesitate to aerate your explanation.
+You should first give a quick explanation of your works, the technical decisions you are making / you made, and why. Don't hesitate to air out your explanation.
 
 You should follow the PR template, it will guide you through the essentials parts of your PR.
 The PR must have the same task list that the issue, except that each tasks will have sub-tasks, who are technical.
