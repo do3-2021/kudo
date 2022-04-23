@@ -1,5 +1,5 @@
 syntax = "proto3";
-package networking;
+package network;
 
 message CreateInterfaceRequest {
     string ip_address = 1;
@@ -25,7 +25,7 @@ message CreateContainerNetworkInterfaceResponse {
 
 message Empty {}
 
-service Networking {
+service Network {
     rpc CreateInterface(CreateInterfaceRequest) returns (CreateInterfaceResponse) {}
     rpc DeleteInterface(DeleteInterfaceRequest) returns (Empty) {}
     rpc CreateContainerNetworkInterface(CreateContainerNetworkInterfaceRequest) returns (CreateContainerNetworkInterfaceResponse) {}
