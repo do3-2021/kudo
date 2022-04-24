@@ -52,9 +52,9 @@ Definition of the maximum (container, binary) or allocated (vm) ressources.
 
 ### ressources.cpu
 
-**type :** float
+**type :** integer
 
-CPU power, in number of cores allocated as a floating number.
+CPU power, in number of milliCPU allocated.
 
 ### ressources.ram
 
