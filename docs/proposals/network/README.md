@@ -4,11 +4,13 @@
 
 ### Introduction
 
-The objective of the network service is to make several instances communicate with each other as if they were all connected to a huge private network, no matter if they are on the same machine or not.
+The objective of the network service is to make several instances communicate with each other as if they were all connected to a single private network, no matter if they are on the same machine or not.
 
 ### Suggested approach
 
 To try to solve this problem, the network service is responsible for creating, configuring and deleting virtual network interfaces used to connect instances to each other within a cluster.
+
+This service has to be running on all nodes of the cluster.
 
 When adding a new node to a cluster, a call to the network service must be done to set up a new container network interface (CNI). A CNI links the virtual interfaces associated with the instances running on that node to the rest of the cluster.
 
@@ -55,11 +57,11 @@ message CreateContainerNetworkInterfaceResponse {
 
 ```protobuf
 service Network {
-    // Create a new virtual inerface
+    // Create a new virtual inerface and add it to the node CNI
     rpc CreateInterface(CreateInterfaceRequest) returns (CreateInterfaceResponse) {}
     // Delete a virtual interface
     rpc DeleteInterface(DeleteInterfaceRequest) returns (Empty) {}
-    // Create a new virtual network interface
+    // Create a new virtual network interface (CNI)
     rpc CreateContainerNetworkInterface(CreateContainerNetworkInterfaceRequest) returns (CreateContainerNetworkInterfaceResponse) {}
 }
 ```
