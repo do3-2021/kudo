@@ -1,53 +1,59 @@
-syntax "proto3";
+syntax = "proto3";
+
 package node_agent;
+import "google/protobuf/empty.proto";
+
+// Represents the status of a container
+enum Status {
+  RUNNING = 0;
+  STARTING = 1;
+  STOPPED = 2;
+  STOPPING = 3;
+  DESTROYING = 4;
+  TERMINATED = 5;
+  CRASHED = 6;
+  FAILED = 7;
+  SCHEDULING = 8;
+  SCHEDULED = 9;
+}
+
+// Represents the different Type of a workflow
+enum Type {
+  CONTAINER = 0;
+}
 
 // Represents an Instance (eg. a container, VM ...)
 message Instance {
   string id = 1;
   string name = 2;
   Type type = 3;
-  State state = 4;
+  Status status = 4;
   string uri = 5;
-  []string environement = 6;
-  Resource resource = 7;
-  []string ports = 8;
+  repeated string environement = 6;
+  MaxResource resource = 7;
+  repeated string ports = 8;
   string ip = 9;
 }
 
-// Represents a summary of all necessary resources
-message ResourceSummary {
-	int cpu = 1;
-	int memory = 2;
-	int disk = 3;
-}
-
-// Represent the maximum/usage of a Instance or a Node
-message Resource {
-	ResourceSummary max = 1;
-	ResourceSummary usage = 2;
+// Represents the current state of a container (eg. starting, running, ...)
+message InstanceStatus {
+  string id = 1;
+  Status status = 2;
+  string description = 3;
 }
 
 
-// Represents a Instance action message
-message InstanceAction {
-	string id = 1;
-	Action action = 2;
+// Represent the maximum resource usage of an Instance
+message MaxResource {
+	int32 cpu = 1;
+  int32 memory = 2;
+  int32 disk = 3;
 }
 
-// Represents the different Instance actions possible
-enum Action {
-	START = 0;
-	STOP = 1;
-	DESTROY = 2;
-	KILL = 3;
-}
-
-// Represents the different Type of a workflow
-enum Type {
-    CONTAINER = 0;
-}
-
-service SchedulerService {
-    rpc InstanceCreate (Instance) returns (google.protobuf.Empty) {}
-    rpc InstanceUpdate (InstanceAction) returns (google.protobuf.Empty) {}
+service InstanceService {
+  rpc create (Instance) returns (stream InstanceStatus) {}
+  rpc start (Instance) returns (google.protobuf.Empty) {}
+  rpc stop (Instance) returns (google.protobuf.Empty) {}
+  rpc destroy (Instance) returns (google.protobuf.Empty) {}
+  rpc kill (Instance) returns (google.protobuf.Empty) {}
 }
