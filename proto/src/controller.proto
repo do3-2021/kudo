@@ -69,6 +69,6 @@ message Resource {
   ResourceSummary usage = 2;
 }
 
-service NodeService {
+service ControllerService {
   rpc UpdateNodeStatus(stream NodeStatus) returns (google.protobuf.Empty) {}
 }

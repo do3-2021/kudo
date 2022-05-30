@@ -31,13 +31,8 @@
 ```rust
 struct Instance {
     id: String,
-    name: String,
-    type: Type,
+    workload_id: String,
     status: Status,
-    uri: String,
-    environment: [String, 100],
-    resources: Resources,
-    ports: [String, 100]
 }
 ```
 

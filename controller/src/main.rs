@@ -1,30 +1,50 @@
-use controller_lib::external_api;
-use controller_lib::internal_api;
-
-use std::error::Error;
-
-mod config;
+use actix_web::middleware::Logger;
+use actix_web::{web, App, HttpResponse, HttpServer};
+use kudo_controller_lib::external_api;
+use kudo_controller_lib::internal_api;
+use proto::controller::controller_service_server::ControllerServiceServer;
+use proto::scheduler::node_service_client::NodeServiceClient;
+use tonic::transport::Server;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    // Init Logger
+async fn main() -> std::io::Result<()> {
     env_logger::init();
 
-    let config: config::KudoControllerConfig = confy::load_path("controller.conf")?;
+    let grpc_client_addr = "http://0.0.0.0:50051";
 
-    // gRPC Server
-    internal_api::interface::InternalAPIInterface::new(
-        config.internal_api.grpc_server_addr,
-        config.internal_api.grpc_server_num_workers,
-    )
-    .await;
+    let grpc_server_addr = "0.0.0.0:50051";
 
-    // HTTP Server
-    external_api::interface::ExternalAPIInterface::new(
-        config.external_api.http_server_addr,
-        config.external_api.http_server_num_workers,
-    )
-    .await;
+    let http_server_addr = "0.0.0.0:3000";
+
+    //gRPC Client
+    tokio::spawn(async move {
+        NodeServiceClient::connect(grpc_client_addr.clone())
+            .await
+            .unwrap();
+    });
+
+    //gRPC Server
+    tokio::spawn(async move {
+        Server::builder()
+            .add_service(ControllerServiceServer::new(
+                internal_api::interface::ControllerServerInterface::default(),
+            ))
+            .serve(grpc_server_addr.clone().parse().unwrap())
+            .await
+            .unwrap();
+    });
+
+    //HTTP Server
+    HttpServer::new(move || {
+        App::new()
+            .route("/health", web::get().to(HttpResponse::Ok))
+            .service(external_api::workload::controller::get_services())
+            .wrap(Logger::default())
+    })
+    .bind(http_server_addr.clone())?
+    .run()
+    .await
+    .unwrap();
 
     Ok(())
 }

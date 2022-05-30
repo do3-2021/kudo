@@ -1,28 +1,22 @@
-use std::net::SocketAddr;
+use tonic::{Request, Response, Status, Streaming};
 
-use super::node::controller::NodeController;
-use log::info;
-use proto::controller::node_service_server::NodeServiceServer;
-use tonic::transport::Server;
+use proto::controller::NodeStatus;
 
-pub struct InternalAPIInterface {}
+use proto::controller::controller_service_server::ControllerService;
 
-impl InternalAPIInterface {
-    pub async fn new(address: SocketAddr, num_workers: usize) -> Self {
-        info!(
-            "Starting {} gRPC worker(s) listening on {}",
-            num_workers, address
-        );
+use super::service::update_node_status;
 
-        for _ in 1..num_workers {
-            tokio::spawn(async move {
-                Server::builder()
-                    .add_service(NodeServiceServer::new(NodeController::default()))
-                    .serve(address)
-                    .await
-                    .unwrap();
-            });
-        }
-        Self {}
+#[derive(Debug, Default)]
+pub struct ControllerServerInterface {}
+
+#[tonic::async_trait]
+impl ControllerService for ControllerServerInterface {
+    async fn update_node_status(
+        &self,
+        request: Request<Streaming<NodeStatus>>,
+    ) -> Result<Response<()>, Status> {
+        let message = update_node_status().unwrap();
+
+        Ok(Response::new(message))
     }
 }
