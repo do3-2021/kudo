@@ -1,32 +1,33 @@
 syntax = "proto3";
 package network;
 
-message CreateInterfaceRequest {
-    string ip_address = 1;
-    repeated int32 ports = 2;
+message CreateNetworkInterfaceRequest {
+    string workload_id = 1;
+    string ip_address = 2;
+    repeated int32 ports = 3;
 }
 
-message CreateInterfaceResponse {
+message CreateNetworkInterfaceResponse {
     string interface_name = 1;
 }
 
-message DeleteInterfaceRequest {
-    string interface_name = 1;
+message DeleteNetworkInterfaceRequest {
+    string workload_id = 1;
 }
 
-message CreateContainerNetworkInterfaceRequest {
+message SetupRequest {
     string ip_address = 1;
     string sub_network = 2;
 }
 
-message CreateContainerNetworkInterfaceResponse {
+message SetupResponse {
     string interface_name = 1;
 }
 
 message Empty {}
 
 service Network {
-    rpc CreateInterface(CreateInterfaceRequest) returns (CreateInterfaceResponse) {}
-    rpc DeleteInterface(DeleteInterfaceRequest) returns (Empty) {}
-    rpc CreateContainerNetworkInterface(CreateContainerNetworkInterfaceRequest) returns (CreateContainerNetworkInterfaceResponse) {}
+    rpc CreateNetworkInterface(CreateNetworkInterfaceRequest) returns (CreateNetworkInterfaceResponse) {}
+    rpc DeleteNetworkInterface(DeleteNetworkInterfaceRequest) returns (Empty) {}
+    rpc Setup(SetupRequest) returns (SetupResponse) {}
 }

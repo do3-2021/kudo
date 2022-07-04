@@ -12,7 +12,7 @@ To try to solve this problem, the network service is responsible for creating, c
 
 This service has to be running on all nodes of the cluster.
 
-When adding a new node to a cluster, a call to the network service must be done to set up a new container network interface (CNI). A CNI links the virtual interfaces associated with the instances running on that node to the rest of the cluster.
+When adding a new node to a cluster, a call to the network service must be done to set up a new container network interface (CNI) service. There is one CNI service per node, and that service bridges the networking interfaces associated with the instances running on the node it controls to the rest of the cluster.
 
 A call to the network service must also be made before creating a new instance in order to set up the virtual network interface connecting the instance to a CNI.
 
