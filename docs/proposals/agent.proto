@@ -34,9 +34,9 @@ message Instance {
   Type type = 3;
   Status status = 4;
   string uri = 5;
-  repeated string environement = 6;
-  MaxResource resource = 7;
-  repeated string ports = 8;
+  repeated string environment = 6;
+  Resource resource = 7;
+  repeated Port ports = 8;
   string ip = 9;
 }
 
@@ -45,13 +45,24 @@ message InstanceStatus {
   string id = 1;
   Status status = 2;
   string description = 3;
+  Resource resource = 4;
 }
 
-// Represent the maximum resource usage of an Instance
-message MaxResource {
+message Port {
+  int32 source = 1;
+  int32 destination = 2;
+}
+
+// Represent the resource usage of a node or a workload 
+message ResourceSummary {
   int32 cpu = 1;
   int32 memory = 2;
   int32 disk = 3;
+}
+
+message Resource {
+  ResourceSummary limit = 1; // cpu, memory, disk limit for a workload or a node
+  ResourceSummary usage = 2; // cpu, memory, disk usage in real-time for a workload or a node
 }
 
 // Represent a signal sent to an instance
