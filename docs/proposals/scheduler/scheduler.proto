@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package scheduler;
+import "google/protobuf/empty.proto";
+
+enum Status {
+    RUNNING = 0;
+    STARTING = 1;
+    STOPPED = 2;
+    STOPPING = 3;
+    DESTROYING = 4;
+    TERMINATED = 5;
+    FAILED = 6;
+    SCHEDULING = 7;
+    SCHEDULED = 8;
+}
+
+enum Type {
+    CONTAINER = 0;
+}
+
+message Instance {
+    string id = 1;
+    string name = 2;
+    Type type = 3;
+    Status status = 4;
+    string uri = 5;
+    repeated string environnement = 6;
+    Resource resource = 7;
+    repeated Port ports = 8;
+    string ip = 9;
+}
+
+message Port {
+    int32 source = 1;
+    int32 destination = 2;
+}
+
+message ResourceSummary {
+    int32 cpu = 1;
+    int32 memory = 2;
+    int32 disk = 3;
+}
+
+message Resource {
+    ResourceSummary limit = 1; // cpu, memory, disk limit for a workload or a node
+    ResourceSummary usage = 2; // cpu, memory, disk usage in real-time for a workload or a node
+}
+
+message InstanceStatus {
+    string id = 1;
+    Status status = 2;
+    string statusDescription = 3;
+    Resource resource = 4;
+}
+
+message NodeStatus {
+    string id = 1;
+    Status status = 2;
+    string statusDescription = 3;
+    Resource resource = 4;
+}
+
+message NodeRegisterRequest {
+    string certificate = 1;
+}
+
+message NodeRegisterResponse {
+    int32 code = 1;
+    string description = 2;
+    string subnet = 3;
+}
+
+message NodeUnregisterRequest {
+    string id = 1;
+}
+
+message NodeUnregisterResponse {
+    int32 code = 1;
+    string description = 2;
+}
+
+message InstanceIdentifier {
+    string id = 1;
+}
+
+service NodeService {
+    rpc Register (NodeRegisterRequest) returns (stream NodeStatus) {}
+    rpc Unregister (NodeUnregisterRequest) returns (NodeUnregisterResponse) {}
+}
+
+service InstanceService {
+    rpc Create (Instance) returns (stream InstanceStatus) {}
+    rpc Start (InstanceIdentifier) returns (google.protobuf.Empty) {}
+    rpc Stop (InstanceIdentifier) returns (google.protobuf.Empty) {}
+    rpc Destroy (InstanceIdentifier) returns (google.protobuf.Empty) {}
+}
