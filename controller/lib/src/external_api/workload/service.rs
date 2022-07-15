@@ -1,17 +1,46 @@
-use super::model::WorkloadInfo;
+use super::model::{Workload, WorkloadError, Type, Ressources};
+use uuid::Uuid;
 
-pub fn get_workloads(ids: &[String]) -> String {
-    format!("get_workloads {}", ids.join(","))
+static mut WORKLOADS: Vec<Workload> = Vec::new();
+
+/* remove this function when etcd is implemented */
+pub fn get_workload(workload_id: &str) -> Result<Workload, WorkloadError> {
+   unsafe {
+    return match WORKLOADS.iter().find(|w| w.id == workload_id) {
+            Some(workload) => Ok(workload.clone()),
+            None => Err(WorkloadError::WorkloadNotFound),
+    }
+   }
 }
 
-pub fn create_workload(workload: &WorkloadInfo) -> String {
-    format!("create_workload {}", workload.name)
+pub fn get_all_workloads() -> Vec<Workload> {
+    unsafe {
+        return WORKLOADS.clone();
+    }
 }
 
-pub fn update_workload(id: &String, workload: &WorkloadInfo) -> String {
-    format!("update_workload {}, id {}", workload.name, id)
+pub fn create_workload(name : String, environment : &[String], port : &[String] ) {
+    let workload = Workload {
+        id: Uuid::new_v4().to_string(),
+        name: name,
+        workload_type: Type::CONTAINER,
+        uri: "http://localhost:8080".to_string(),
+        environment: environment.to_vec(),
+        resources: Ressources {
+            cpu: 0,
+            memory: 0,
+            disk: 0
+        },
+        ports: port.to_vec()
+    };
+    // remove push
+    unsafe {
+        WORKLOADS.push(workload);
+    }
 }
 
+
+/* 
 pub fn delete_workload(id: &String) -> String {
-    format!("delete_workload {}", id)
-}
+    return format!("delete_workload {}", id);
+}*/

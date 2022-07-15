@@ -1,11 +1,37 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-pub struct _Workload {
-    pub id: String,
-    pub name: String,
+pub enum WorkloadError {
+    WorkloadNotFound,
 }
 
+#[derive(Deserialize,Serialize, Clone)]
+pub enum Type {
+	CONTAINER
+}
+#[derive(Deserialize,Serialize, Clone)]
+pub struct Ressources {
+	pub cpu: i32,
+	pub memory: i32,
+	pub disk: i32
+}
+#[derive(Deserialize,Serialize, Clone,)]
+#[serde(rename_all = "camelCase")]
+
+pub struct Workload {
+	pub id: String,
+	pub name: String,
+	pub workload_type: Type,
+	pub uri: String,
+	pub environment: Vec<String>,
+	pub resources: Ressources,
+	pub ports: Vec<String>,
+}
 #[derive(Deserialize)]
-pub struct WorkloadInfo {
+pub struct WorkloadDTO {
     pub name: String,
+    pub environment: Vec<String>,
+    pub ports: Vec<String>,
 }
+
+
+
