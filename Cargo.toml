@@ -1,0 +1,9 @@
+[workspace]
+
+members = [
+    "controller",
+    "node-agent",
+    "network",
+    "kudoctl",
+    "scheduler",
+]
