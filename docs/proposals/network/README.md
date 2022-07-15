@@ -25,30 +25,31 @@ After the destruction of an instance, the network service must be called to remo
 ### Messages
 
 ```protobuf
-// Request structure used to create a new virtual interface
-message CreateInterfaceRequest {
-    string ip_address = 1;
-    repeated int32 ports = 2;
+// Request structure used to create a new virtual network interface
+message CreateNetworkInterfaceRequest {
+    string workload_id = 1;
+    string ip_address = 2;
+    repeated int32 ports = 3;
 }
 
 // Response structure returned after a new virtual interface has been created
-message CreateInterfaceResponse {
+message CreateNetworkInterfaceResponse {
     string interface_name = 1;
 }
 
 // Request structure used to delete a virtual interface
-message DeleteInterfaceRequest {
-    string interface_name = 1;
+message DeleteNetworkInterfaceRequest {
+    string workload_id = 1;
 }
 
-// Request structure used to create a new virtual network interface
-message CreateContainerNetworkInterfaceRequest {
+// Request structure used to setup a new node's network
+message SetupRequest {
     string ip_address = 1;
     string sub_network = 2;
 }
 
-// Response structure returned after a new network interface has been created
-message CreateContainerNetworkInterfaceResponse {
+// Response structure returned after a new node's network has been setup
+message SetupResponse {
     string interface_name = 1;
 }
 ```
@@ -58,10 +59,10 @@ message CreateContainerNetworkInterfaceResponse {
 ```protobuf
 service Network {
     // Create a new virtual inerface and add it to the node CNI
-    rpc CreateInterface(CreateInterfaceRequest) returns (CreateInterfaceResponse) {}
+    rpc CreateNetworkInterface(CreateNetworkInterfaceRequest) returns (CreateNetworkInterfaceResponse) {}
     // Delete a virtual interface
-    rpc DeleteInterface(DeleteInterfaceRequest) returns (Empty) {}
+    rpc DeleteNetworkInterface(DeleteNetworkInterfaceRequest) returns (Empty) {}
     // Create a new virtual network interface (CNI)
-    rpc CreateContainerNetworkInterface(CreateContainerNetworkInterfaceRequest) returns (CreateContainerNetworkInterfaceResponse) {}
+    rpc Setup(SetupRequest) returns (SetupResponse) {}
 }
 ```
