@@ -18,8 +18,18 @@ async fn main() -> Result<(), Error> {
     
     // DELETE
     etcd.delete("hello").await?;
-    resp = etcd.get("hello").await?;
+    // resp = etcd.get("hello").await?;
     println!("{:?}", resp);
+
+    // GET ALL
+    etcd.put("bar", "foo").await?;
+    etcd.put("foo", "bar").await?;
+
+    let values = etcd.get_all().await?;
+    for value in values {
+        println!("{}", value);
+    }
+
 
     Ok(())
 }
