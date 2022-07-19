@@ -2,11 +2,10 @@ use serde::{Deserialize, Serialize};
 
 pub enum WorkloadError {
     WorkloadNotFound,
-<<<<<<< HEAD
-    Etcd(String),
+	Etcd(String)
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize,Serialize, Clone, Debug)]
 =======
 	Etcd(String)
 }
@@ -16,22 +15,14 @@ pub enum WorkloadError {
 pub enum Type {
     CONTAINER,
 }
-<<<<<<< HEAD
-#[derive(Deserialize, Serialize, Clone, Debug)]
-=======
 #[derive(Deserialize,Serialize, Clone, Debug)]
->>>>>>> chore : Controller & service for workloads with etcd
 pub struct Ressources {
     pub cpu: i32,
     pub memory: i32,
     pub disk: i32,
 }
-<<<<<<< HEAD
-#[derive(Deserialize, Serialize, Clone, Debug)]
-=======
 #[derive(Deserialize,Serialize, Clone,Debug)]
 #[serde(rename_all = "camelCase")]
->>>>>>> chore : Controller & service for workloads with etcd
 
 pub struct Workload {
     pub id: String,

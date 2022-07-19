@@ -19,6 +19,7 @@ etcd-client = "0.9"
 
 >>>>>>> chore : Controller & service for workloads with etcd
 
+
 [dependencies.uuid]
 version = "1.1.2"
 features = [
