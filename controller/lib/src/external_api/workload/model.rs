@@ -2,20 +2,21 @@ use serde::{Deserialize, Serialize};
 
 pub enum WorkloadError {
     WorkloadNotFound,
-    Etcd(String),
+	Etcd(String)
 }
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize,Serialize, Clone, Debug)]
 pub enum Type {
     CONTAINER,
 }
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize,Serialize, Clone, Debug)]
 pub struct Ressources {
     pub cpu: i32,
     pub memory: i32,
     pub disk: i32,
 }
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize,Serialize, Clone,Debug)]
+#[serde(rename_all = "camelCase")]
 
 pub struct Workload {
     pub id: String,

@@ -24,14 +24,10 @@ impl WorkloadService {
         }
     }
 
-    pub async fn get_all_workloads(&mut self) -> Vec<Workload> {
-        let mut new_vec: Vec<Workload> = Vec::new();
+    pub async fn get_all_workloads(&mut self) -> Vec<String> {
         match self.etcd_service.get_all().await {
             Ok(workloads) => {
-                for workload in workloads {
-                    new_vec.push(serde_json::from_str(&workload).unwrap());
-                }
-                new_vec
+                panic!("{:?}", workloads);
             },
             Err(_) => {
                 return vec![];
@@ -44,7 +40,7 @@ impl WorkloadService {
             id: Uuid::new_v4().to_string(),
             name: workload_dto.name,
             workload_type: Type::CONTAINER,
-            uri: workload_dto.uri,
+            uri: "http://localhost:8080".to_string(),
             environment: workload_dto.environment.to_vec(),
             resources: Ressources {
                 cpu: 0,
@@ -53,7 +49,7 @@ impl WorkloadService {
             },
             ports: workload_dto.ports.to_vec()
         };
-        match self.etcd_service.put(&workload.id, &serde_json::to_string(&workload).unwrap()).await {
+        match self.etcd_service.put(&workload.id, &serde_json::to_string(&workload).unwrap()[..]).await {
             Ok(_) => Ok(serde_json::to_string(&workload).unwrap()),
             Err(e) => Err(WorkloadError::Etcd(e.to_string())),
         }
@@ -66,7 +62,7 @@ impl WorkloadService {
                     id: workload_id.to_string(),
                     name: workload_dto.name,
                     workload_type: Type::CONTAINER,
-                    uri: workload_dto.uri,
+                    uri: "http://localhost:8080".to_string(),
                     environment: workload_dto.environment.to_vec(),
                     resources: Ressources {
                         cpu: 0,
@@ -96,5 +92,4 @@ impl WorkloadService {
             Err(_) => Err(WorkloadError::WorkloadNotFound),
         }
     }
-
 }
