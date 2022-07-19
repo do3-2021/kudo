@@ -6,4 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-proto = { path = "../proto" }
+controller_lib = { path = "./lib" }
+tokio = { version = "1.20.0", features = ["macros"] }
+env_logger = "0.6.0"
