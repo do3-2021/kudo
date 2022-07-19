@@ -1,62 +1,87 @@
-use super::{model::WorkloadDTO, service, model::WorkloadError};
-use actix_web::{delete, get, patch, put, web, HttpResponse, Responder, Scope,};
+use super::{model::WorkloadDTO, service, model::WorkloadError, };
+use actix_web::{ web, HttpResponse, Responder, Scope,};
 use actix_web::http::{StatusCode};
-use serde_json; 
 
-pub fn get_services() -> Scope {
-    web::scope("/workload")
-        .service(get_all_workloads)
-        .service(get_workload)
-        .service(put_workload)
-        //.service(patch_workload)
-        //.service(delete_workload)
+
+struct WorkloadController {
+    workload_service: service::WorkloadService,
 }
 
+impl WorkloadController {
+    pub async fn new() -> Self {
+        WorkloadController { 
+            workload_service : service::WorkloadService::new().await
+        }
+    }
+    
+    pub async fn get_workload(workload_id: web::Path<String>) -> impl Responder {
+        let mut workload_service = service::WorkloadService::new().await;
+        match workload_service.get_workload(&workload_id).await {
+            Ok(workload) => HttpResponse::build(StatusCode::OK).body(
+                workload.clone()
+            ),
+            Err(e) => match e {
+                WorkloadError::WorkloadNotFound => HttpResponse::build(StatusCode::NOT_FOUND)
+                .body("Workload not found"),
+                WorkloadError::Etcd(e) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).body(e),
+            }
+        }
+    }
 
 
-#[get("/")]
-pub async fn get_all_workloads() -> impl Responder {
-    service::get_all_workloads();
-    // return workloads in json format
-    HttpResponse::Ok().body(
-        serde_json::to_string(&service::get_all_workloads()).unwrap()
-    )
-}
+    pub async fn put_workload(body: web::Json<WorkloadDTO>) -> impl Responder {
+        let mut workload_service = service::WorkloadService::new().await;
+        let workload_dto = body.into_inner();
+        match workload_service.create_workload( workload_dto).await {
+            Ok(workload) => HttpResponse::build(StatusCode::CREATED).body(workload),
+            Err(WorkloadError::WorkloadNotFound) => HttpResponse::build(StatusCode::NOT_FOUND).body("Workload not found"),
+            Err(WorkloadError::Etcd(e)) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).body(e),
+        }
+    }
 
-#[get("/{workload_id}")]
-pub async fn get_workload(workload_id: web::Path<String>) -> impl Responder {
-    match service::get_workload(&workload_id) {
-        Ok(workload) => HttpResponse::build(StatusCode::OK).body(
-            serde_json::to_string(&workload).unwrap()
-        ),
-        Err(e) => match e {
-            WorkloadError::WorkloadNotFound => HttpResponse::build(StatusCode::NOT_FOUND)
-            .body("Workload not found"),
-            _ => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
-            .body("Internal server error"),
+    pub async fn get_all_workloads() -> impl Responder {
+        let mut workload_service = service::WorkloadService::new().await;
+        workload_service.get_all_workloads().await;    
+        HttpResponse::build(StatusCode::OK).body("ok")
+    } 
+
+    pub async fn patch_workload(workload_id: web::Path<String>, body: web::Json<WorkloadDTO>) -> impl Responder {
+        let mut workload_service = service::WorkloadService::new().await;
+
+        let workload_dto = body.into_inner();
+
+        match workload_service.update_workload(&workload_id, workload_dto).await {
+            Ok(workload) => {
+                HttpResponse::build(StatusCode::CREATED).body(workload)
+            },
+            Err(e) => match e {
+                WorkloadError::WorkloadNotFound => HttpResponse::build(StatusCode::NOT_FOUND).body("Workload not found"),
+                WorkloadError::Etcd(e) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).body(e),
+            }
+        }
+
+    }
+
+    pub async fn delete_workload(workload_id: web::Path<String>) -> impl Responder {
+        let mut workload_service = service::WorkloadService::new().await;
+        match workload_service.delete_workload(&workload_id).await {
+            Ok(_) => HttpResponse::build(StatusCode::NO_CONTENT).body("Remove successfully"), 
+            Err(e) => match e {
+                WorkloadError::WorkloadNotFound => HttpResponse::build(StatusCode::NOT_FOUND).body("Workload not found"),
+                WorkloadError::Etcd(e) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).body(e), 
+            }
         }
     }
 }
 
-#[put("/")]
-pub async fn put_workload(body: web::Json<WorkloadDTO>) -> impl Responder {
-    let workload_dto = body.into_inner();
-    service::create_workload( workload_dto.name, &workload_dto.environment, &workload_dto.ports);
-    HttpResponse::build(StatusCode::CREATED)
-}
-/* 
-#[patch("/{workload_id}")]
-pub async fn patch_workload(
-    workload_id: web::Path<String>,
-    body: web::Json<WorkloadInfo>,
-) -> impl Responder {
-    let workload_info = body.into_inner();
-
+pub async fn get_services() -> Scope {
+    let mut workload_controller = self::WorkloadController::new().await;
+    web::scope("/workload")
+        .service(web::resource("/{workload_id}").route(web::delete().to(workload_controller.delete_workload))
+            .route(web::get().to(workload_controller.get_workload))
+            .route(web::patch().to(workload_controller.patch_workload)))
+        .service(web::resource("/").route(web::put().to(workload_controller.put_workload))
+            .route(web::get().to(workload_controller.get_all_workloads)))                                         
 }
 
-#[delete("/{workload_id}")]
-pub async fn delete_workload(workload_id: web::Path<String>) -> impl Responder {
-    service::delete_workload(&workload_id);
-    HttpResponse::Ok().body(format!("delete_workload {}", workload_id))
-}
-*/
+
