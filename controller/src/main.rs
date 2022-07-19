@@ -6,30 +6,52 @@ use etcd_client::Error;
 async fn main() -> Result<(), Error> {
     let mut etcd = internal_etcd::interface::EtcdInterface::new().await;
 
-    // PUT
-    etcd.put("hello", "world").await?;
-    let mut resp = etcd.get("hello").await?;
-    println!("{:?}", resp);
+    // // PUT
+    // etcd.put("hello", "world").await?;
+    // let mut resp = etcd.get("hello").await?;
+    // println!("{:?}", resp);
     
-    // PATCH
-    etcd.patch("hello", "kudo").await?;
-    resp = etcd.get("hello").await?;
-    println!("{:?}", resp);
-    
-    // DELETE
-    etcd.delete("hello").await?;
+    // // PATCH
+    // etcd.patch("hello", "kudo").await?;
     // resp = etcd.get("hello").await?;
-    println!("{:?}", resp);
+    // println!("{:?}", resp);
+    
+    // // DELETE
+    // etcd.delete("hello").await?;
+    // // resp = etcd.get("hello").await?;
+    // println!("{:?}", resp);
 
-    // GET ALL
-    etcd.put("bar", "foo").await?;
-    etcd.put("foo", "bar").await?;
+    // // GET ALL
+    // etcd.put("bar", "foo").await?;
+    // etcd.put("foo", "bar").await?;
 
-    let values = etcd.get_all().await?;
-    for value in values {
+    // let values = etcd.get_all().await?;
+    // for value in values {
+    //     println!("{}", value);
+    // }
+
+
+    // GET SOME PAGINATION
+    // etcd.delete_all().await?;
+    // etcd.put("1", "1").await?;
+    // etcd.put("1", "1").await?;
+    // etcd.put("2", "2").await?;
+    // etcd.put("3", "3").await?;
+    // etcd.put("4", "4").await?;
+    // etcd.put("5", "5").await?;
+    // etcd.put("6", "6").await?;
+    // etcd.put("7", "7").await?;
+    // etcd.put("8", "8").await?;
+
+
+    // let mut values_new = etcd.get_all_pagination(internal_etcd::interface::PaginateRequest::new(100, 0)).await?;
+    // for value in values_new.get_values() {
+    //     println!("{}", value);
+    // }
+    let values_new = etcd.get_all_pagination(internal_etcd::interface::PaginateRequest::new(5, 0)).await?;
+    for value in values_new.get_values() {
         println!("{}", value);
     }
-
-
+    println!("length: {}", values_new.get_count());
     Ok(())
 }
