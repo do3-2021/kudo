@@ -14,9 +14,8 @@ impl WorkloadController {
         }
     }
     
-    pub async fn get_workload(workload_id: web::Path<String>) -> impl Responder {
-        let mut workload_service = service::WorkloadService::new().await;
-        match workload_service.get_workload(&workload_id).await {
+    pub async fn get_workload(&mut self,workload_id: web::Path<String>) -> impl Responder {
+        match self.workload_service.get_workload(&workload_id).await {
             Ok(workload) => HttpResponse::build(StatusCode::OK).body(
                 workload.clone()
             ),
@@ -31,28 +30,25 @@ impl WorkloadController {
     pub async fn put_workload(body: web::Json<WorkloadDTO>) -> impl Responder {
         let mut workload_service = service::WorkloadService::new().await;
 
-    pub async fn put_workload(body: web::Json<WorkloadDTO>) -> impl Responder {
-        let mut workload_service = service::WorkloadService::new().await;
+    pub async fn put_workload(&mut self,body: web::Json<WorkloadDTO>) -> impl Responder {
         let workload_dto = body.into_inner();
-        match workload_service.create_workload( workload_dto).await {
+        match self.workload_service.create_workload( workload_dto).await {
             Ok(workload) => HttpResponse::build(StatusCode::CREATED).body(workload),
             Err(WorkloadError::WorkloadNotFound) => HttpResponse::build(StatusCode::NOT_FOUND).body("Workload not found"),
             Err(WorkloadError::Etcd(e)) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).body(e),
         }
     }
 
-    pub async fn get_all_workloads() -> impl Responder {
-        let mut workload_service = service::WorkloadService::new().await;
-        workload_service.get_all_workloads().await;    
+    pub async fn get_all_workloads(&mut self) -> impl Responder {
+        self.workload_service.get_all_workloads().await;    
         HttpResponse::build(StatusCode::OK).body("ok")
     } 
 
-    pub async fn patch_workload(workload_id: web::Path<String>, body: web::Json<WorkloadDTO>) -> impl Responder {
-        let mut workload_service = service::WorkloadService::new().await;
+    pub async fn patch_workload(&mut self,workload_id: web::Path<String>, body: web::Json<WorkloadDTO>) -> impl Responder {
 
         let workload_dto = body.into_inner();
 
-        match workload_service.update_workload(&workload_id, workload_dto).await {
+        match self.workload_service.update_workload(&workload_id, workload_dto).await {
             Ok(workload) => {
                 HttpResponse::build(StatusCode::CREATED).body(workload)
             },
@@ -64,9 +60,8 @@ impl WorkloadController {
 
     }
 
-    pub async fn delete_workload(workload_id: web::Path<String>) -> impl Responder {
-        let mut workload_service = service::WorkloadService::new().await;
-        match workload_service.delete_workload(&workload_id).await {
+    pub async fn delete_workload(&mut self,workload_id: web::Path<String>) -> impl Responder {
+        match self.workload_service.delete_workload(&workload_id).await {
             Ok(_) => HttpResponse::build(StatusCode::NO_CONTENT).body("Remove successfully"), 
             Err(e) => match e {
                 WorkloadError::WorkloadNotFound => HttpResponse::build(StatusCode::NOT_FOUND).body("Workload not found"),
