@@ -24,10 +24,14 @@ impl WorkloadService {
         }
     }
 
-    pub async fn get_all_workloads(&mut self) -> Vec<String> {
+    pub async fn get_all_workloads(&mut self) -> Vec<Workload> {
+        let mut new_vec: Vec<Workload> = Vec::new();
         match self.etcd_service.get_all().await {
             Ok(workloads) => {
-                panic!("{:?}", workloads);
+                for workload in workloads {
+                    new_vec.push(serde_json::from_str(&workload).unwrap());
+                }
+                new_vec
             },
             Err(_) => {
                 return vec![];
@@ -49,7 +53,7 @@ impl WorkloadService {
             },
             ports: workload_dto.ports.to_vec()
         };
-        match self.etcd_service.put(&workload.id, &serde_json::to_string(&workload).unwrap()[..]).await {
+        match self.etcd_service.put(&workload.id, &serde_json::to_string(&workload).unwrap()).await {
             Ok(_) => Ok(serde_json::to_string(&workload).unwrap()),
             Err(e) => Err(WorkloadError::Etcd(e.to_string())),
         }
@@ -92,4 +96,5 @@ impl WorkloadService {
             Err(_) => Err(WorkloadError::WorkloadNotFound),
         }
     }
+
 }
