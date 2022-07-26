@@ -128,8 +128,9 @@ message InstanceIdentifier {
 ---
 
 ```protobuf
-service AgentService {
-    rpc Register (NodeRegisterRequest) returns (stream NodeStatus) {}
+service NodeService {
+    rpc Status (stream NodeStatus) returns (google.protobuf.Empty) {}
+    rpc Register (NodeRegisterRequest) returns (NodeRegisterResponse) {}
     rpc Unregister (NodeUnregisterRequest) returns (NodeUnregisterResponse) {}
 }
 ```

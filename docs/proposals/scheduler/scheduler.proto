@@ -85,7 +85,8 @@ message InstanceIdentifier {
 }
 
 service NodeService {
-    rpc Register (NodeRegisterRequest) returns (stream NodeStatus) {}
+    rpc Status (stream NodeStatus) returns (google.protobuf.Empty) {}
+    rpc Register (NodeRegisterRequest) returns (NodeRegisterResponse) {}
     rpc Unregister (NodeUnregisterRequest) returns (NodeUnregisterResponse) {}
 }
 
