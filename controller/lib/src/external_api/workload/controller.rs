@@ -3,17 +3,10 @@ use actix_web::{ web, HttpResponse, Responder, Scope,};
 use actix_web::http::{StatusCode};
 
 
-struct WorkloadController {
-    workload_service: service::WorkloadService,
-}
+struct WorkloadController {}
 
 impl WorkloadController {
-    pub async fn new() -> Self {
-        WorkloadController { 
-            workload_service : service::WorkloadService::new().await
-        }
-    }
-    
+
     pub async fn get_workload(workload_id: web::Path<String>) -> impl Responder {
         let mut workload_service = service::WorkloadService::new().await;
         match workload_service.get_workload(&workload_id).await {
@@ -22,7 +15,7 @@ impl WorkloadController {
             ),
             Err(e) => match e {
                 WorkloadError::WorkloadNotFound => HttpResponse::build(StatusCode::NOT_FOUND)
-                .body("Workload not found"),
+                    .body("Workload not found"),
                 WorkloadError::Etcd(e) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).body(e),
             }
         }
@@ -85,5 +78,3 @@ pub fn get_services() -> Scope {
         .service(web::resource("/").route(web::put().to(WorkloadController::put_workload))
             .route(web::get().to(WorkloadController::get_all_workloads)))                                         
 }
-
-
