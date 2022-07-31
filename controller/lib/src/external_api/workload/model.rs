@@ -31,5 +31,5 @@ pub struct WorkloadDTO {
     pub name: String,
     pub environment: Vec<String>,
     pub ports: Vec<String>,
-    pub uri: String,
+	pub uri : String,
 }

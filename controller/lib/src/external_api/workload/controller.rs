@@ -98,8 +98,12 @@ mod tests {
                 .route(web::get().to(WorkloadController::get_workload)))
     )).await;
         // create put request to insert workload
-        let payload = r#"{"name":"nginx","environment" : ["NGINX_PROXY=false"],"ports": ["80", "443"]}"#;
-        let req_put = test::TestRequest::put().uri("/workload/")
+        let payload = r#"{
+            "name":"nginx",
+            "environment" : ["NGINX_PROXY=false"],
+            "ports": ["80", "443"],
+            "uri":"http://localhost"
+        }"#;        let req_put = test::TestRequest::put().uri("/workload/")
         .insert_header(ContentType::json())
         .set_payload(payload)
         .to_request();
@@ -125,7 +129,12 @@ mod tests {
 
     )).await;
         // create put request to insert workload
-        let payload = r#"{"name":"nginx","environment" : ["NGINX_PROXY=false"],"ports": ["80", "443"]}"#;
+        let payload = r#"{
+            "name":"nginx",
+            "environment" : ["NGINX_PROXY=false"],
+            "ports": ["80", "443"],
+            "uri":"http://localhost"
+        }"#;
         let req_put = test::TestRequest::put().uri("/workload/")
         .insert_header(ContentType::json())
         .set_payload(payload)
@@ -139,8 +148,6 @@ mod tests {
         assert!(resp_delete.status() == StatusCode::NO_CONTENT);
     }
 
-
-
     #[actix_web::test]
     async fn test_get_all() {
         // create temp app http for test
@@ -152,7 +159,6 @@ mod tests {
         // create get_all request to get all workloads
         let req_get = test::TestRequest::get().uri("/workload/").to_request();
         let resp_get = test::call_service(&app, req_get).await;
-        println!("{:?}", resp_get.status());
         assert!(resp_get.status() == StatusCode::OK);
     }
 }
