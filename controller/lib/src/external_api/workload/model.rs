@@ -16,7 +16,6 @@ pub struct Ressources {
 	pub disk: i32
 }
 #[derive(Deserialize,Serialize, Clone,Debug)]
-#[serde(rename_all = "camelCase")]
 
 pub struct Workload {
 	pub id: String,
