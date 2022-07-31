@@ -491,20 +491,10 @@ dependencies = [
 name = "controller"
 version = "0.1.0"
 dependencies = [
- "confy",
- "controller_lib",
- "env_logger 0.6.2",
- "serde",
- "tokio",
-]
-
-[[package]]
-name = "controller_lib"
-version = "0.1.0"
-dependencies = [
  "actix-web",
- "etcd-client",
- "log",
+ "confy",
+ "env_logger 0.6.2",
+ "kudo_controller_lib",
  "proto",
  "serde",
  "tokio",
@@ -1041,6 +1031,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "258451ab10b34f8af53416d1fdab72c22e805f0c92a1136d59470ec0b11138b2"
 dependencies = [
  "wasm-bindgen",
+]
+
+[[package]]
+name = "kudo_controller_lib"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "etcd-client",
+ "log",
+ "proto",
+ "serde",
+ "serde_json",
+ "tonic",
+ "uuid",
 ]
 
 [[package]]
@@ -2204,6 +2208,12 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "vcpkg"
+version = "0.2.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "version_check"
