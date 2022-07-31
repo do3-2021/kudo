@@ -28,8 +28,7 @@ impl WorkloadController {
         let workload_dto = body.into_inner();
         match workload_service.create_workload( workload_dto).await {
             Ok(workload) => HttpResponse::build(StatusCode::CREATED).body(workload),
-            Err(WorkloadError::WorkloadNotFound) => HttpResponse::build(StatusCode::NOT_FOUND).body("Workload not found"),
-            Err(WorkloadError::Etcd(e)) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).body(e),
+            Err(_) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).body("Internal Server Error"),
         }
     }
 
