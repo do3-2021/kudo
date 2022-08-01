@@ -4,7 +4,7 @@ package controller;
 import "google/protobuf/empty.proto";
 
 // Represents the liveness status of an Instance
-enum Status {
+enum InstanceState {
   RUNNING = 0;
   STARTING = 1;
   STOPPED = 2;
@@ -16,13 +16,22 @@ enum Status {
   SCHEDULED = 8;
 }
 
+// Represents the liveness status of a Node
+enum NodeState {
+  REGISTERING = 0;
+  REGISTERED = 1;
+  UNREGISTERING = 2;
+  UNREGISTERED = 3;
+  FAILING = 4;
+}
+
 // Represents the type of workload running
 enum Type { CONTAINER = 0; }
 
 // Represents a Node status message
 message NodeStatus {
   string id = 1;
-  Status status = 2;
+  NodeState state = 2;
   string statusDescription = 3;
   Resource resource = 4;
   repeated Instance instances = 5;
@@ -33,7 +42,7 @@ message Instance {
   string id = 1;
   string name = 2;
   Type type = 3;
-  Status status = 4;
+  InstanceState state = 4;
   string uri = 5;
   repeated string environnement = 6;
   Resource resource = 7;
