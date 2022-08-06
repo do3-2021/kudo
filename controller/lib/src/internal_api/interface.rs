@@ -1,6 +1,6 @@
 use super::node::controller::NodeController;
 use log::info;
-use proto::controller::controller_service_server::ControllerServiceServer;
+use proto::controller::node_service_server::NodeServiceServer;
 use tonic::transport::Server;
 
 pub struct InternalAPIInterface {}
@@ -16,7 +16,7 @@ impl InternalAPIInterface {
             let address = address.clone();
             tokio::spawn(async move {
                 Server::builder()
-                    .add_service(ControllerServiceServer::new(NodeController::default()))
+                    .add_service(NodeServiceServer::new(NodeController::default()))
                     .serve(address.parse().unwrap())
                     .await
                     .unwrap();

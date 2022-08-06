@@ -3,7 +3,7 @@ use tonic::{Request, Response, Status, Streaming};
 
 use proto::controller::NodeStatus;
 
-use proto::controller::controller_service_server::ControllerService;
+use proto::controller::node_service_server::NodeService;
 
 use super::service::update_node_status;
 
@@ -11,7 +11,7 @@ use super::service::update_node_status;
 pub struct NodeController {}
 
 #[tonic::async_trait]
-impl ControllerService for NodeController {
+impl NodeService for NodeController {
     async fn update_node_status(
         &self,
         request: Request<Streaming<NodeStatus>>,

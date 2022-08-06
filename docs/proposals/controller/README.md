@@ -106,70 +106,75 @@ struct ResourceClaim {
 ### Messages
 
 ```protobuf
-// Represents an Instance status message
-message InstanceStatus {
-    string id = 1;
-    Status status = 2;
-    string description = 3;
-}
-
 // Represents a Node status message
 message NodeStatus {
-    string id = 1;
-    Status status = 2;
-    string description = 3;
-    Resource resource = 4;
-    [] Instance instances = 5;
+  string id = 1;
+  NodeState state = 2;
+  string statusDescription = 3;
+  Resource resource = 4;
+  repeated Instance instances = 5;
 }
 
-//Represents an Instance running
+// Represents an Instance
 message Instance {
-    string id = 1;
-    string name = 2;
-    Type type = 3;
-    Status status = 4;
-    string uri = 5;
-    [] string environnement = 6;
-    Resource resource = 7;
-    [] string ports = 8;
-    string ip = 9;
+  string id = 1;
+  string name = 2;
+  Type type = 3;
+  InstanceState state = 4;
+  string uri = 5;
+  repeated string environnement = 6;
+  Resource resource = 7;
+  repeated Port ports = 8;
+  string ip = 9;
 }
 
-//Represents a Resource entry
+message Port {
+  int32 source = 1;
+  int32 dest = 2;
+}
+
+// Represent a resource entry
 message ResourceSummary {
-    int cpu = 1;
-    int memory = 2;
-    int disk = 3;
+  int32 cpu = 1;
+  int32 memory = 2;
+  int32 disk = 3;
 }
 
-//Represents the resources used & threshold
+// Represents the resources used by the Instance & the limit where the workload
+// will be killed
 message Resource {
-    ResourceSummary max = 1;
-    ResourceSummary usage = 2;
+  ResourceSummary limit = 1;
+  ResourceSummary usage = 2;
 }
 ```
 
 ### Enums
 
 ```protobuf
-//Represents the liveness status of
-enum Status {
-    RUNNING = 0;
-    STARTING = 1;
-    STOPPED = 2;
-    STOPPING = 3;
-    DESTROYING = 4;
-    TERMINATED = 5;
-    CRASHED = 6;
-    FAILED = 7;
-    SCHEDULING = 8;
-    SCHEDULED = 9;
+// Represents the liveness status of an Instance
+enum InstanceState {
+  RUNNING = 0;
+  STARTING = 1;
+  STOPPED = 2;
+  STOPPING = 3;
+  DESTROYING = 4;
+  TERMINATED = 5;
+  FAILED = 6;
+  SCHEDULING = 7;
+  SCHEDULED = 8;
 }
 
-//Represents the type of workload running
-enum Type {
-    CONTAINER = 0;
+// Represents the liveness status of a Node
+enum NodeState {
+  REGISTERING = 0;
+  REGISTERED = 1;
+  UNREGISTERING = 2;
+  UNREGISTERED = 3;
+  FAILING = 4;
 }
+
+// Represents the type of workload running
+enum Type { CONTAINER = 0; }
 ```
 
 ## Functions
@@ -177,9 +182,7 @@ enum Type {
 ### Controller → Scheduler (gRPC)
 
 ```protobuf
-service SchedulerService {
-    rpc setNodeStatus(NodeStatus) returns (google.protobuf.Empty) {}
-    rpc setInstanceStatus(InstanceStatus) returns (google.protobuf.Empty) {}
+service NodeService {
+  rpc UpdateNodeStatus(stream NodeStatus) returns (google.protobuf.Empty) {}
 }
-
 ```
