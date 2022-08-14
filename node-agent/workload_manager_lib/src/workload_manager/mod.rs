@@ -6,7 +6,6 @@ mod workload;
 use workload::error::{WorkloadError};
 use workload::Workload;
 
-#[path="./workload-listener/mod.rs"]
 mod workload_listener;
 use workload_listener::WorkloadListener;
 use proto::agent::{Instance, SignalInstruction, Signal};
