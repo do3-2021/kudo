@@ -10,6 +10,7 @@ mod workload_listener;
 use workload_listener::WorkloadListener;
 use proto::agent::{Instance, SignalInstruction, Signal};
 
+use tonic::Status; 
 use uuid::Uuid;
 
 pub struct WorkloadManager {
@@ -27,7 +28,7 @@ impl WorkloadManager {
         }
     }
 
-    pub async fn create(&mut self, instance: Instance) -> Result<Receiver, WorkloadManagerError> {
+    pub async fn create(&mut self, instance: Instance) -> Result<Receiver, Status> {
         let id = Uuid::new_v4();
         (tx, rx) = self.tx_rx;
 
@@ -47,18 +48,18 @@ impl WorkloadManager {
 //        Err(WorkloadError::new("Error"))
     }
 
-    pub async fn signal(&mut self, signalInstruction: SignalInstruction) -> Result<(), WorkloadError> {
+    pub async fn signal(&mut self, signalInstruction: SignalInstruction) -> Result<(), Status> {
         let workload_id = signalInstruction.instance.id;
 
         let workload = match(self.workloads.get(workload_id.clone())) {
-            None => Err(WorkloadError::new("This workload does not exist")),
+            None => Err(WorkloadError::not_found("This workload does not exist")),
             Some(workload) => workload
         };
 
         match(signalInstruction.signal) {
             Signal::STOP => workload.stop().await,
             Signal::KILL => workload.kill().await,
-            _ => Err(WorkloadError::new("This signal does not exist")) 
+            _ => Err(Status::not_found("This signal does not exist")) 
         };
 
         self.workloads.remove(workload_id);
