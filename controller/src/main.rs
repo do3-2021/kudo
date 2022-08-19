@@ -28,6 +28,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .await;
 
     // ETCD Client
-    internal_etcd::interface::EtcdInterface::new().await;
+    internal_etcd::interface::EtcdInterface::new("localhost:2379".to_string()).await;
     Ok(())
 }
