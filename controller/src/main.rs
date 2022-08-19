@@ -1,5 +1,6 @@
 use controller_lib::external_api;
 use controller_lib::internal_api;
+use controller_lib::internal_etcd;
 
 use std::error::Error;
 
@@ -26,5 +27,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await;
 
+    // ETCD Client
+    internal_etcd::interface::EtcdInterface::new().await;
     Ok(())
 }
