@@ -28,6 +28,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .await;
 
     // ETCD Client
+<<<<<<< HEAD
     internal_etcd::interface::EtcdInterface::new("localhost:2379".to_string()).await;
+=======
+    internal_etcd::interface::EtcdInterface::new().await;
+>>>>>>> f42dba2 (feat: implement etcd base interface)
     Ok(())
 }
