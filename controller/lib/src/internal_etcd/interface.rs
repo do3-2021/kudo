@@ -1,5 +1,5 @@
 use etcd_client::{Client, Error, PutResponse, DeleteResponse, GetOptions };
-use log::info;
+use log::{info,error};
 
 pub struct PaginateRequest {
   limit: usize,
@@ -21,16 +21,15 @@ pub struct PaginateResult {
 }
 
 impl PaginateResult {
-  pub fn new() -> Self {
+  pub fn new(count: usize) -> Self {
     PaginateResult {
-      count: 0, 
+      count: count, 
       values: vec![]
     }
   }
 
   pub fn push(&mut self, value: String) {
     self.values.push(value);
-    self.count+= 1;
   }
 
   pub fn get_values(& self) -> &Vec<String> {
@@ -49,6 +48,7 @@ pub struct EtcdInterface {
 
 impl EtcdInterface {
   pub async fn new(address: String) -> Self {
+    info!("Starting ETCD client on {}", address);
     EtcdInterface {
         client: Client::connect([address], None).await.unwrap(),
     }
@@ -57,26 +57,36 @@ impl EtcdInterface {
   pub async fn get(&mut self, key: &str) -> Result<String, Error> {
     if let Some(kv) = self.client.get(key, None).await?.kvs().first() {
       let res = kv.value_str();
+      info!("Retrieving value in ETCD : Key \"{}\" is associated with value \"{}\"", key, res.as_ref().unwrap());
       res.map(|s| s.to_string())
     } else {
+      error!("Error while retrieving value in ETCD : Key \"{}\" not found", key);
+      Err(Error::from(std::io::Error::new(std::io::ErrorKind::NotFound, "Key not found")))
+    }
+  }
+  
+  pub async fn put(&mut self, key: &str, value: &str) -> Result<PutResponse, Error> {
+    info!("Inserting value in ETCD : Key \"{}\" associated with value \"{}\"", key, value);
+    self.client.put(key, value, None).await
+  }
+  
+  pub async fn patch(&mut self, key: &str, value: &str) -> Result<PutResponse, Error> {
+    info!("Updating value in ETCD : Key \"{}\" associated with new value \"{}\"", key, value);
+    self.client.put(key, value, None).await
+  }
+  
+  pub async fn delete(&mut self, key: &str) -> Result<DeleteResponse, Error> {
+    if let Some(kv) = self.client.get(key, None).await?.kvs().first() {
+      info!("Deleting value in ETCD : Key \"{}\" ", key);
+      self.client.delete(key, None).await
+    } else {
+      error!("Error while deleting value in ETCD : Key \"{}\" not found", key);
       Err(Error::from(std::io::Error::new(std::io::ErrorKind::NotFound, "Key not found")))
     }
   }
 
-  pub async fn put(&mut self, key: &str, value: &str) -> Result<PutResponse, Error> {
-    self.client.put(key, value, None).await
-  }
-
-  pub async fn patch(&mut self, key: &str, value: &str) -> Result<PutResponse, Error> {
-    self.client.put(key, value, None).await
-  }
-
-  pub async fn delete(&mut self, key: &str) -> Result<DeleteResponse, Error> {
-    self.client.delete(key, None).await
-  }
-
   pub async fn get_all(&mut self) -> Result<Vec<String>,Error> {
-
+    info!("Retrieving all keys in ETCD");
     let resp = self.client
         .get("", Some(GetOptions::new().with_all_keys()))
         .await?;
@@ -107,13 +117,13 @@ impl EtcdInterface {
     let max_index_in_request:usize = first_index + paginate_request.limit;
     let max_index_in_keys = if length < max_index_in_request {length} else {max_index_in_request};  
     
-    let mut paginate_result: PaginateResult = PaginateResult::new();
+    let mut paginate_result: PaginateResult = PaginateResult::new(length);
 
     for i in first_index..max_index_in_keys {
       let value = resp.kvs()[i].value_str()?;
       paginate_result.push(value.to_string());
     }
-    
+    info!("Retrieving all keys with pagination in ETCD ({} showed/ {} total)", paginate_result.values.len(), length);
     Ok(paginate_result)
 
   }
