@@ -4,6 +4,7 @@ use proto::scheduler::{Instance, InstanceIdentifier, InstanceStatus};
 use tonic::transport::{Channel, Error};
 use tonic::{Request, Response, Status, Streaming};
 
+#[derive(Debug)]
 pub enum SchedulerClientInterfaceError {
     ConnectionError(Error),
     RequestFailed(Status),
@@ -22,10 +23,10 @@ impl SchedulerClientInterface {
             instance_client_address,
         );
 
-        let instance_client = match InstanceServiceClient::connect(instance_client_address).await {
-            Ok(client) => client,
-            Err(e) => return Err(SchedulerClientInterfaceError::ConnectionError(e)),
-        };
+        let instance_client = InstanceServiceClient::connect(instance_client_address)
+            .await
+            .map_err(|err| SchedulerClientInterfaceError::ConnectionError(err))
+            .unwrap();
 
         Ok(Self { instance_client })
     }
