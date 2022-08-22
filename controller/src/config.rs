@@ -11,6 +11,7 @@ pub struct KudoControllerConfig {
 pub struct InternalAPIConfig {
     pub grpc_server_addr: SocketAddr,
     pub grpc_server_num_workers: usize,
+    pub etcd_server_addr: SocketAddr,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -28,6 +29,10 @@ impl Default for KudoControllerConfig {
                     50051,
                 ),
                 grpc_server_num_workers: 1,
+                etcd_server_addr: SocketAddr::new(
+                    std::net::IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
+                    2379,
+                ),
             },
             external_api: ExternalAPIConfig {
                 http_server_addr: SocketAddr::new(

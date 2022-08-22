@@ -507,6 +507,7 @@ dependencies = [
  "log",
  "proto",
  "serde",
+ "serde_json",
  "tokio",
  "tonic",
 ]
@@ -1486,6 +1487,7 @@ name = "proto"
 version = "0.1.0"
 dependencies = [
  "prost",
+ "serde",
  "tonic",
  "tonic-build",
 ]

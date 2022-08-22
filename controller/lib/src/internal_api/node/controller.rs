@@ -1,22 +1,45 @@
-use log::info;
-use tonic::{Request, Response, Status, Streaming};
+use log::{error, info};
+use std::net::SocketAddr;
+use std::sync::Arc;
+use tokio::sync::Mutex;
+use tonic::{Code, Request, Response, Status, Streaming};
 
-use proto::controller::NodeStatus;
+use super::model::NodeStatus;
+use super::service::NodeService;
 
-use proto::controller::node_service_server::NodeService;
+#[derive(Debug)]
+pub enum NodeControllerError {
+    NodeServiceError(super::service::NodeServiceError),
+}
 
-use super::service::update_node_status;
+pub struct NodeController {
+    node_service: Arc<Mutex<NodeService>>,
+}
 
-#[derive(Debug, Default)]
-pub struct NodeController {}
+impl NodeController {
+    pub async fn new(etcd_address: SocketAddr) -> Result<Self, NodeControllerError> {
+        Ok(NodeController {
+            node_service: Arc::new(Mutex::new(
+                NodeService::new(etcd_address)
+                    .await
+                    .map_err(NodeControllerError::NodeServiceError)?,
+            )),
+        })
+    }
+}
 
 #[tonic::async_trait]
-impl NodeService for NodeController {
+impl proto::controller::node_service_server::NodeService for NodeController {
     async fn update_node_status(
         &self,
-        request: Request<Streaming<NodeStatus>>,
+        request: Request<Streaming<proto::controller::NodeStatus>>,
     ) -> Result<Response<()>, Status> {
-        let remote_address = request.remote_addr().unwrap();
+        let remote_address = if let Some(remote_address) = request.remote_addr() {
+            remote_address.to_string()
+        } else {
+            error!("\"update_node_status\" Failed to get remote address");
+            "Error getting remote address".to_string()
+        };
 
         info!(
             "{} \"update_node_status\" streaming initiated",
@@ -25,12 +48,23 @@ impl NodeService for NodeController {
 
         let mut stream = request.into_inner();
 
-        while let Some(node_status) = stream.message().await.unwrap() {
+        while let Some(node_status) = stream.message().await? {
             info!(
                 "{} \"update_node_status\" received chunk",
                 remote_address.clone()
             );
-            update_node_status(node_status).unwrap();
+            self.node_service
+                .clone()
+                .lock()
+                .await
+                .update_node_status(NodeStatus::from(node_status))
+                .await
+                .map_err(|err| {
+                    Status::new(
+                        Code::Internal,
+                        format!("Error updating node status : {}", err),
+                    )
+                })?;
         }
 
         info!(
