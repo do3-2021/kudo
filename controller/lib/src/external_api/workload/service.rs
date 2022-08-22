@@ -44,7 +44,7 @@ impl WorkloadService {
             id: Uuid::new_v4().to_string(),
             name: workload_dto.name,
             workload_type: Type::CONTAINER,
-            uri: "http://localhost:8080".to_string(),
+            uri: workload_dto.uri,
             environment: workload_dto.environment.to_vec(),
             resources: Ressources {
                 cpu: 0,
@@ -66,7 +66,7 @@ impl WorkloadService {
                     id: workload_id.to_string(),
                     name: workload_dto.name,
                     workload_type: Type::CONTAINER,
-                    uri: "http://localhost:8080".to_string(),
+                    uri: workload_dto.uri,
                     environment: workload_dto.environment.to_vec(),
                     resources: Ressources {
                         cpu: 0,
