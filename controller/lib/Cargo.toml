@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-etcd-client = "0.9.2"
+rand = "0.8.5"
 actix-web = "4.1.0"
 serde = { version = "1.0.139", features = ["derive"] }
 tonic = "0.7.2"
@@ -14,11 +14,7 @@ proto = { path = "../../proto" }
 log = "0.4.0"
 serde_json = "1.0"
 etcd-client = "0.9"
-<<<<<<< HEAD
-=======
-
->>>>>>> chore : Controller & service for workloads with etcd
-
+tokio = "1.20.1"
 
 [dependencies.uuid]
 version = "1.1.2"

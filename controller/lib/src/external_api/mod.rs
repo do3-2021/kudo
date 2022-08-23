@@ -1,2 +1,2 @@
-pub mod interface;
+pub mod instance;
 pub mod workload;

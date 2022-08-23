@@ -1041,8 +1041,10 @@ dependencies = [
  "etcd-client",
  "log",
  "proto",
+ "rand",
  "serde",
  "serde_json",
+ "tokio",
  "tonic",
  "uuid",
 ]
@@ -1490,6 +1492,7 @@ name = "proto"
 version = "0.1.0"
 dependencies = [
  "prost",
+ "serde",
  "tonic",
  "tonic-build",
 ]

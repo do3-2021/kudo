@@ -2,27 +2,33 @@ use serde::{Deserialize, Serialize};
 
 pub enum WorkloadError {
     WorkloadNotFound,
-	Etcd(String)
+    Etcd(String),
+    OutOfRange,
 }
 
-#[derive(Deserialize,Serialize, Clone, Debug)]
-=======
-	Etcd(String)
+#[derive(Deserialize, Serialize)]
+
+pub struct Pagination {
+    pub limit: u32,
+    pub offset: u32,
 }
 
-#[derive(Deserialize,Serialize, Clone, Debug)]
->>>>>>> chore : Controller & service for workloads with etcd
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub enum Type {
-    CONTAINER,
+    CONTAINER = 0,
 }
-#[derive(Deserialize,Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Ressources {
     pub cpu: i32,
     pub memory: i32,
     pub disk: i32,
 }
-#[derive(Deserialize,Serialize, Clone,Debug)]
-#[serde(rename_all = "camelCase")]
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct Ports {
+    pub source: i32,
+    pub destination: i32,
+}
+#[derive(Deserialize, Serialize, Clone, Debug)]
 
 pub struct Workload {
     pub id: String,
@@ -31,12 +37,13 @@ pub struct Workload {
     pub uri: String,
     pub environment: Vec<String>,
     pub resources: Ressources,
-    pub ports: Vec<String>,
+    pub ports: Vec<Ports>,
+    pub namespace: String,
 }
 #[derive(Deserialize)]
 pub struct WorkloadDTO {
     pub name: String,
     pub environment: Vec<String>,
-    pub ports: Vec<String>,
+    pub ports: Vec<Ports>,
     pub uri: String,
 }

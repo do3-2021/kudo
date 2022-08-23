@@ -14,7 +14,7 @@ async fn main() -> std::io::Result<()> {
             .service(external_api::workload::controller::get_services())
             .wrap(Logger::default())
     })
-    .bind(http_server_addr.clone())?
+    .bind(http_server_addr)?
     .run()
     .await
     .unwrap();

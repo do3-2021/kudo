@@ -10,6 +10,19 @@ pub enum SchedulerClientInterfaceError {
     RequestFailed(Status),
 }
 
+impl ToString for SchedulerClientInterfaceError {
+    fn to_string(&self) -> String {
+        match self {
+            SchedulerClientInterfaceError::ConnectionError(err) => {
+                format!("Connection Error : {}", err)
+            }
+            SchedulerClientInterfaceError::RequestFailed(status) => {
+                format!("Request Failed : {}", status)
+            }
+        }
+    }
+}
+
 pub struct SchedulerClientInterface {
     instance_client: InstanceServiceClient<Channel>,
 }
@@ -25,7 +38,7 @@ impl SchedulerClientInterface {
 
         let instance_client = InstanceServiceClient::connect(instance_client_address)
             .await
-            .map_err(|err| SchedulerClientInterfaceError::ConnectionError(err))
+            .map_err(SchedulerClientInterfaceError::ConnectionError)
             .unwrap();
 
         Ok(Self { instance_client })
