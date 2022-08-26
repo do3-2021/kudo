@@ -20,13 +20,20 @@ pub struct Instance {
     pub environment: Vec<String>,
     pub resource: Option<Resource>,
     pub ports: Vec<Port>,
-    pub ip: std::net::SocketAddr,
+    pub ip: std::net::Ipv4Addr,
+    pub namespace: String
 }
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Resource {
     pub limit: Option<ResourceSummary>,
     pub usage: Option<ResourceSummary>,
+}
+
+
+#[derive(Deserialize,Serialize)]
+pub struct InstanceDTO {
+    pub id: String
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -93,6 +100,7 @@ impl From<super::super::workload::model::Workload> for Instance {
             num_restarts: 0,
             uri: workload.uri,
             environment: workload.environment,
+            namespace: "default".to_string(),
             resource: Some(Resource {
                 limit: Some(ResourceSummary {
                     cpu: workload.resources.cpu,
@@ -114,9 +122,6 @@ impl From<super::super::workload::model::Workload> for Instance {
     }
 }
 
-fn generate_ip() -> std::net::SocketAddr {
-    std::net::SocketAddr::V4(std::net::SocketAddrV4::new(
-        std::net::Ipv4Addr::new(0, 0, 0, 0),
-        0,
-    ))
+fn generate_ip() -> std::net::Ipv4Addr {
+    std::net::Ipv4Addr::new(0, 0, 0, 0)
 }

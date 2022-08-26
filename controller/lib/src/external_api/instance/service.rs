@@ -22,16 +22,27 @@ impl InstanceService {
             etcd_service: EtcdClient::new("".to_string()).await.unwrap(),
         }
     }
-    // pub async fn generate_ip_adress() -> std::net::Ipv4Addr {
-    //     let mut ip = std::net::Ipv4Addr::new(10,0,0,0)
-    //     match etcd_service.get("last_ip").await {
-    //         Ok(value) => 
-    //         Err(_) => ip
-    //     }
-    //     etcd_service.put("last_ip", ip.to_string())
-    // }
 
     pub async fn retrieve_and_start_instance(
+        this: Arc<Mutex<Self>>,
+        instance: Instance,
+    ) -> Result<(), InstanceError> {
+        return match this
+            .clone()
+            .lock()
+            .await
+            .etcd_service
+            .get(instance.id.as_str())
+            .await
+        {
+            Some(_) => Ok(()),
+            None => {
+                return Err(InstanceError::InstanceNotFound);
+            }
+        };
+    }
+
+    pub async fn retrieve_and_start_instance_from_workload(
         this: Arc<Mutex<Self>>,
         workload_id: &str,
     ) -> Result<(), InstanceError> {
@@ -46,7 +57,6 @@ impl InstanceService {
             Some(workload) => {
                 let workload_parsed: Workload = serde_json::from_str(&workload).unwrap();
                 let instance = Instance::from(workload_parsed);
-                //TODO Start instance
                 //Spawn a thread to start the instance
                 let mut stream = this
                     .clone()
@@ -118,10 +128,20 @@ impl InstanceService {
         }
     }
 
-    pub async fn get_instance(&mut self, instance_id: &str) -> Result<Instance, InstanceError> {
+    pub async fn get_instance(
+        &mut self,
+        instance_id: &str,
+        namespace: &str,
+    ) -> Result<Instance, InstanceError> {
         match self.etcd_service.get(instance_id).await {
             Some(instance) => match serde_json::from_str::<Instance>(&instance) {
-                Ok(instance) => Ok(instance),
+                Ok(instance) => {
+                    if instance.namespace == namespace {
+                        Ok(instance)
+                    } else {
+                        Err(InstanceError::InstanceNotFound)
+                    }
+                }
                 Err(_) => Err(InstanceError::InstanceNotFound),
             },
             None => Err(InstanceError::InstanceNotFound),

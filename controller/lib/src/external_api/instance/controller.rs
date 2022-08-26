@@ -2,7 +2,8 @@ use std::sync::Arc;
 
 use super::super::workload::model::Workload;
 use super::super::workload::service::WorkloadService;
-use super::service;
+use super::model::InstanceDTO;
+use super::service::{self, InstanceService};
 use actix_web::http::StatusCode;
 use actix_web::{web, HttpResponse, Responder, Scope};
 use tokio::sync::Mutex;
@@ -27,7 +28,7 @@ impl InstanceController {
                 let workload = serde_json::from_str::<Workload>(&workload_str);
                 match workload {
                     Ok(_) => {
-                        match super::service::InstanceService::retrieve_and_start_instance(
+                        match super::service::InstanceService::retrieve_and_start_instance_from_workload(
                             Arc::new(Mutex::new(instance_service)),
                             &workload_id,
                         )
@@ -48,15 +49,16 @@ impl InstanceController {
     }
     pub async fn delete_instance(
         namespace: web::Path<String>,
-        workload_id: web::Path<String>,
+        body: web::Json<InstanceDTO>,
     ) -> impl Responder {
         let mut instance_service = service::InstanceService::new("0.0.0.0:50051").await;
         let mut workload_service = WorkloadService::new().await;
+        let instance_dto = body.into_inner();
         match workload_service
-            .get_workload(&workload_id, &namespace)
+            .get_workload(instance_dto.id.as_str(), &namespace)
             .await
         {
-            Ok(_) => match instance_service.get_instance(&workload_id).await {
+            Ok(_) => match instance_service.get_instance(instance_dto.id.as_str(), &namespace).await {
                 Ok(instance) => match instance_service.delete_instance(instance).await {
                     Ok(_) => HttpResponse::build(StatusCode::OK).body("Instance deleted"),
                     Err(_) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
@@ -70,49 +72,47 @@ impl InstanceController {
 
     pub async fn patch_instance(
         namespace: web::Path<String>,
-        workload_id: web::Path<String>,
+        body: web::Json<InstanceDTO>,
     ) -> impl Responder {
         let mut instance_service = service::InstanceService::new("0.0.0.0:50051").await;
-        let mut workload_service = WorkloadService::new().await;
-        match workload_service
-            .get_workload(&workload_id, &namespace)
-            .await
-        {
-            Ok(_) => match instance_service.get_instance(&workload_id).await {
-                Ok(instance) => match instance_service.delete_instance(instance).await {
+        let instance_dto: InstanceDTO = body.into_inner();
+        match instance_service.get_instance(instance_dto.id.as_str(), &namespace).await {
+                Ok(instance) => match instance_service.delete_instance(instance.clone()).await {
                     Ok(_) => {
                         match super::service::InstanceService::retrieve_and_start_instance(
                             Arc::new(Mutex::new(instance_service)),
-                            &workload_id,
+                            instance,
                         )
                         .await
                         {
                             Ok(_) => HttpResponse::build(StatusCode::CREATED)
                                 .body("Instance creating and starting..."),
                             Err(_) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
-                                .body("Internal Server Error"),
+                            .body("Internal Server Error"),
                         }
-                    }
+                    },
                     Err(_) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
                         .body("Internal Server Error"),
                 },
                 Err(_) => HttpResponse::build(StatusCode::NOT_FOUND).body("Instance not found"),
-            },
-            Err(_) => HttpResponse::build(StatusCode::NOT_FOUND).body("Workload not found"),
-        }
+            }
+        
+        
+        
     }
 
     pub async fn get_instance(
         namespace: web::Path<String>,
-        workload_id: web::Path<String>,
+        body: web::Json<InstanceDTO>,
     ) -> impl Responder {
         let mut instance_service = service::InstanceService::new("0.0.0.0:20051").await;
         let mut workload_service = WorkloadService::new().await;
+        let instance_dto = body.into_inner();
         match workload_service
-            .get_workload(&workload_id, &namespace)
+            .get_workload(instance_dto.id.as_str(), &namespace)
             .await
         {
-            Ok(_) => match instance_service.get_instance(&workload_id).await {
+            Ok(_) => match instance_service.get_instance(instance_dto.id.as_str(), &namespace).await {
                 Ok(instance) => match serde_json::to_string(&instance) {
                     Ok(instance_str) => HttpResponse::build(StatusCode::OK).body(instance_str),
                     Err(_) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
