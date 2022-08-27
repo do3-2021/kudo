@@ -3,7 +3,7 @@ use std::sync::Arc;
 use super::super::workload::model::Workload;
 use super::super::workload::service::WorkloadService;
 use super::model::InstanceDTO;
-use super::service::{self, InstanceService};
+use super::service;
 use actix_web::http::StatusCode;
 use actix_web::{web, HttpResponse, Responder, Scope};
 use tokio::sync::Mutex;
