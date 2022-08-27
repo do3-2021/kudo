@@ -2396,6 +2396,7 @@ version = "0.1.0"
 dependencies = [
  "proto",
  "rand",
+ "tokio",
  "tonic 0.8.0",
  "uuid",
 ]

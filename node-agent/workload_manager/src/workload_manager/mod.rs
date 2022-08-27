@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use std::sync::mpsc::{Sender, Receiver, channel};
 
 mod workload;
-use tonic::codegen::http::status;
 use workload::Workload;
 
 mod workload_listener;
@@ -127,4 +126,126 @@ impl ToString for WorkloadManager {
     fn to_string(&self) -> String {
         format!("workloads: {}, listeners: {}", self.workloads.len(), self.listeners.len())
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+
+    #[test]
+    fn constructor() {
+        let wm = super::WorkloadManager::new();
+        
+        assert_eq!(wm.listeners.capacity(), 0);
+        assert_eq!(wm.workloads.capacity(), 0);
+    }
+
+    #[tokio::test]
+    async fn create() {
+        let mut wm = super::WorkloadManager::new();
+        
+        let instance = proto::agent::Instance {
+            id: "someuuid".to_string(),
+            name: "somename".to_string(),
+            r#type: proto::agent::Type::Container as i32,
+            status: proto::agent::Status::Running as i32,
+            uri: "debian:latest".to_string(),
+            environment: vec!["A=0".to_string()],
+            resource: Some(proto::agent::Resource {
+                limit: Some(proto::agent::ResourceSummary {
+                    cpu: i32::MAX,
+                    memory: i32::MAX,
+                    disk: i32::MAX,
+                }),
+                usage: Some(proto::agent::ResourceSummary {
+                    cpu: 0,
+                    memory: 0,
+                    disk: 0,
+                }),
+            }),
+            ports: vec![],
+            ip: "127.0.0.1".to_string(),
+        };
+
+        let rx = wm.create(instance).await.unwrap();
+
+        // uncomment this when workloads will be merged
+        // let received = rx.recv().unwrap();
+        // assert!(received.resource.unwrap().usage.unwrap().cpu >= 0);
+
+        println!("{:?}", wm.workloads.keys());
+        assert_eq!(wm.listeners.len(), 0);
+        assert_eq!(wm.workloads.len(), 0);
+
+    }
+
+    #[tokio::test]
+    async fn signal() {
+        let mut wm = super::WorkloadManager::new();
+        
+        let instance = proto::agent::Instance {
+            id: "someuuid".to_string(),
+            name: "somename".to_string(),
+            r#type: proto::agent::Type::Container as i32,
+            status: proto::agent::Status::Running as i32,
+            uri: "debian:latest".to_string(),
+            environment: vec!["A=0".to_string()],
+            resource: Some(proto::agent::Resource {
+                limit: Some(proto::agent::ResourceSummary {
+                    cpu: i32::MAX,
+                    memory: i32::MAX,
+                    disk: i32::MAX,
+                }),
+                usage: Some(proto::agent::ResourceSummary {
+                    cpu: 0,
+                    memory: 0,
+                    disk: 0,
+                }),
+            }),
+            ports: vec![],
+            ip: "127.0.0.1".to_string(),
+        };
+
+        let signal = proto::agent::SignalInstruction{
+            instance: Some(proto::agent::Instance {
+                id: "someuuid".to_string(),
+                name: "somename".to_string(),
+                r#type: proto::agent::Type::Container as i32,
+                ..Default::default()
+            }),
+            signal: proto::agent::Signal::Kill as i32
+        };
+
+        let tx = wm.tx_rx.0.clone();
+        let rx = wm.create(instance).await.unwrap();
+        
+        let (_to_replace, not_used_rx ) = std::sync::mpsc::channel();
+
+        let hshmpwrkld: HashMap<String, crate::workload_manager::Workload> = std::collections::HashMap::new();
+        let hshmplstn: HashMap<String, crate::workload_manager::workload_listener::WorkloadListener> = std::collections::HashMap::new();
+
+
+        // cannot borrow `wm` as mutable more than once at a timesecond mutable borrow occurs here
+        let mut wm2 = crate::workload_manager::WorkloadManager { 
+            workloads: hshmpwrkld,
+            listeners: hshmplstn,
+            tx_rx: (tx, not_used_rx)
+        };
+        
+        wm2.signal(signal).await.unwrap();
+        
+        for _ in 0..2 {
+            let recv = rx.recv().unwrap();
+            assert!(
+                recv.status == proto::agent::Status::Stopping as i32
+                ||
+                recv.status == proto::agent::Status::Destroying as i32
+            );
+        }
+
+        assert_eq!(wm.listeners.len(), 0);
+
+    }
+
 }
