@@ -3,6 +3,7 @@ use std::net::SocketAddr;
 use super::filter::FilterService;
 use super::model::{Ressources, Type, Workload, WorkloadDTO, WorkloadError};
 use crate::etcd::EtcdClient;
+use log::debug;
 use serde_json;
 
 /// `WorkloadService` is a struct that inpired from Controllers Provider Modules architectures. It can be used as a service in the WorkloadController .A service can use other services.
@@ -76,6 +77,7 @@ impl WorkloadService {
         let mut new_vec: Vec<Workload> = Vec::new();
         match self.etcd_service.get_all().await {
             Some(workloads) => {
+                debug!("{:?}", workloads);
                 for workload in workloads {
                     // if workload deserialize failed , we don't want to throw error , so we just don't add it to the vector
                     if let Ok(workload) = serde_json::from_str::<Workload>(&workload) {
@@ -96,6 +98,7 @@ impl WorkloadService {
                 new_vec
             }
             None => {
+                debug!("No workloads found");
                 vec![]
             }
         }

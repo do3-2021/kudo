@@ -20,6 +20,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         config.external_api.http_server_addr,
         config.external_api.http_server_num_workers,
         config.external_api.etcd_address,
+        config.internal_api.grpc_server_addr
     )
     .await;
 

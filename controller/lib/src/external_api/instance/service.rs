@@ -1,10 +1,11 @@
-use std::net::{Ipv4Addr, SocketAddrV4};
+use std::net::{Ipv4Addr, SocketAddrV4, SocketAddr};
 use std::sync::Arc;
 
 use super::model::{Instance, InstanceError};
 use crate::etcd::EtcdClient;
 use crate::external_api::workload::model::Workload;
 use crate::grpc_client::interface::SchedulerClientInterface;
+use log::info;
 use proto::controller::InstanceState;
 use serde_json;
 use tokio::sync::Mutex;
@@ -16,13 +17,20 @@ pub struct InstanceService {
 }
 
 impl InstanceService {
-    pub async fn new(grpc_address: &str) -> Self {
-        InstanceService {
-            grpc_service: SchedulerClientInterface::new(grpc_address.to_string())
-                .await
-                .unwrap(),
-            etcd_service: EtcdClient::new("".to_string()).await.unwrap(),
-        }
+    pub async fn new(grpc_address: SocketAddr, etcd_address: SocketAddr) -> Result<Self, InstanceError> {
+        info!("Creating instance service with grpc address: {} and etcd address: {}", grpc_address, etcd_address);
+        let grpc_service =  SchedulerClientInterface::new(grpc_address.to_string()).await
+            .map_err(|err|{
+                InstanceError::Grpc(err.to_string())
+            })?;
+        let etcd_service = EtcdClient::new(etcd_address.to_string()).await.map_err(|err|{
+            InstanceError::Etcd(err.to_string())
+        })?;
+        Ok( Self {
+            grpc_service,
+            etcd_service,
+        } )
+        
     }
 
     pub async fn generate_ip(&mut self) -> Result<SocketAddrV4, InstanceError> {
