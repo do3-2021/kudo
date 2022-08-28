@@ -1,3 +1,4 @@
+use std::net::{Ipv4Addr, SocketAddrV4};
 use std::sync::Arc;
 
 use super::model::{Instance, InstanceError};
@@ -24,19 +25,59 @@ impl InstanceService {
         }
     }
 
+    pub async fn generate_ip(&mut self) -> Result<SocketAddrV4, InstanceError> {
+        let ip = Ipv4Addr::new(10, 0, 0, 1);
+        match self.etcd_service.get("last_ip").await {
+            Some(value) => {
+                let socket_address: SocketAddrV4 =
+                    serde_json::from_str(&value).map_err(InstanceError::SerdeError).unwrap();
+                let mut octets = socket_address.ip().octets();
+                for i in 0..3 {
+                    if octets[3 - i] < 255 {
+                        octets[3 - i] += 1;
+                        break;
+                    } else {
+                        octets[3 - i] = 0;
+                    }
+                }
+                let new_ip = SocketAddrV4::new(Ipv4Addr::from(octets), socket_address.port());
+                self.etcd_service.put(
+                    "last_ip",
+                    &serde_json::to_string(&new_ip)
+                        .map_err(InstanceError::SerdeError)
+                        .unwrap(),
+                ).await;
+                Ok(new_ip)
+            }
+            None => {
+                let new_ip = SocketAddrV4::new(ip, 0);
+                self.etcd_service.put(
+                    "last_ip",
+                    &serde_json::to_string(&new_ip)
+                        .map_err(InstanceError::SerdeError)
+                        .unwrap(),
+                ).await;
+                Ok(new_ip)
+            }
+        }
+    }
+
     pub async fn retrieve_and_start_instance(
         this: Arc<Mutex<Self>>,
-        instance: Instance,
+        new_instance: Instance,
     ) -> Result<(), InstanceError> {
         return match this
             .clone()
             .lock()
             .await
             .etcd_service
-            .get(instance.id.as_str())
+            .get(new_instance.id.as_str())
             .await
         {
             Some(_) => {
+                //Generate an ip for the instance
+                let mut instance = new_instance.clone();
+                instance.ip = this.clone().lock().await.generate_ip().await?;
                 //Spawn a thread to start the instance
                 tokio::spawn(async move {
                     loop {
@@ -105,7 +146,8 @@ impl InstanceService {
         {
             Some(workload) => {
                 let workload_parsed: Workload = serde_json::from_str(&workload).unwrap();
-                let instance = Instance::from(workload_parsed);
+                let mut instance = Instance::from(workload_parsed);
+                instance.ip = this.clone().lock().await.generate_ip().await?;
                 //Spawn a thread to start the instance
                 tokio::spawn(async move {
                     loop {

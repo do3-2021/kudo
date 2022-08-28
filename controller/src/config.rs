@@ -17,6 +17,7 @@ pub struct InternalAPIConfig {
 pub struct ExternalAPIConfig {
     pub http_server_addr: SocketAddr,
     pub http_server_num_workers: usize,
+    pub etcd_address: SocketAddr,
 }
 
 impl Default for KudoControllerConfig {
@@ -35,6 +36,10 @@ impl Default for KudoControllerConfig {
                     3000,
                 ),
                 http_server_num_workers: 1,
+                etcd_address: SocketAddr::new(
+                    std::net::IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
+                    2379,
+                ),
             },
         }
     }

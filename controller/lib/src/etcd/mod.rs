@@ -40,19 +40,24 @@ impl EtcdClient {
         }
     }
 
-    pub async fn get_all(&mut self) -> Result<Vec<String>, Error> {
+    pub async fn get_all(&mut self) -> Option<Vec<String>> {
         info!("Retrieving all keys in ETCD");
         let resp = self
             .inner
             .get("", Some(GetOptions::new().with_all_keys()))
-            .await?;
+            .await
+            .ok();
 
-        let mut values: Vec<String> = vec![];
-        for kv in resp.kvs() {
-            let value = kv.value_str()?;
-            values.push(value.to_string())
-        }
-        Ok(values)
+        resp.map(|res| {
+            let mut values: Vec<String> = vec![];
+            for kv in res.kvs() {
+                if let Ok(value) = kv.value_str() {
+                    values.push(value.to_string());
+                }
+            }
+            Some(values)
+        });
+        None
     }
 }
 /*

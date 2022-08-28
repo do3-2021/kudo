@@ -1,23 +1,31 @@
-use actix_web::middleware::Logger;
-use actix_web::{web, App, HttpResponse, HttpServer};
-use kudo_controller_lib::external_api;
+use controller_lib::external_api;
+use controller_lib::internal_api;
+
+use std::error::Error;
+
+mod config;
 
 #[tokio::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> Result<(), Box<dyn Error>> {
+    // Init Logger
     env_logger::init();
 
-    let http_server_addr = "0.0.0.0:3000";
-    //HTTP Server
-    HttpServer::new(move || {
-        App::new()
-            .route("/health", web::get().to(HttpResponse::Ok))
-            .service(external_api::workload::controller::get_services())
-            .wrap(Logger::default())
-    })
-    .bind(http_server_addr)?
-    .run()
-    .await
-    .unwrap();
+    let config: config::KudoControllerConfig = confy::load_path("controller.conf")?;
+
+    // gRPC Server
+    internal_api::interface::InternalAPIInterface::new(
+        config.internal_api.grpc_server_addr,
+        config.internal_api.grpc_server_num_workers,
+    )
+    .await;
+
+    // HTTP Server
+    external_api::interface::ExternalAPIInterface::new(
+        config.external_api.http_server_addr,
+        config.external_api.http_server_num_workers,
+        config.external_api.etcd_address,
+    )
+    .await;
 
     Ok(())
 }

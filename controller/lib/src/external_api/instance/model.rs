@@ -2,7 +2,7 @@ use std::net::{Ipv4Addr, SocketAddrV4};
 
 use serde::{Deserialize, Serialize};
 
-const DEFAULT_IP_ADRESS: Ipv4Addr = Ipv4Addr::new(10,0,0,1);
+const DEFAULT_IP_ADDRESS: Ipv4Addr = Ipv4Addr::new(10, 0, 0, 1);
 
 #[derive(Debug)]
 pub enum InstanceError {
@@ -25,7 +25,7 @@ pub struct Instance {
     pub resource: Option<Resource>,
     pub ports: Vec<Port>,
     pub ip: SocketAddrV4,
-    pub namespace: String
+    pub namespace: String,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -34,10 +34,9 @@ pub struct Resource {
     pub usage: Option<ResourceSummary>,
 }
 
-
-#[derive(Deserialize,Serialize)]
+#[derive(Deserialize, Serialize)]
 pub struct InstanceDTO {
-    pub id: String
+    pub id: String,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -121,11 +120,7 @@ impl From<super::super::workload::model::Workload> for Instance {
                     dest: port.destination,
                 })
                 .collect(),
-            ip: SocketAddrV4::new(DEFAULT_IP_ADRESS, 0)
+            ip: SocketAddrV4::new(DEFAULT_IP_ADDRESS, 0),
         }
     }
-}
-
-fn generate_ip() -> std::net::Ipv4Addr {
-    std::net::Ipv4Addr::new(0, 0, 0, 0)
 }
