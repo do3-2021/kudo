@@ -3,7 +3,10 @@ use serde::{Deserialize, Serialize};
 pub enum WorkloadError {
     WorkloadNotFound,
     Etcd(String),
+    NameAlreadyExists(String),
     OutOfRange,
+    JsonToWorkload(String),
+    WorkloadToJson(String),
 }
 
 #[derive(Deserialize, Serialize)]
@@ -15,7 +18,7 @@ pub struct Pagination {
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub enum Type {
-    CONTAINER = 0,
+    Container = 0,
 }
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Ressources {
@@ -40,7 +43,8 @@ pub struct Workload {
     pub ports: Vec<Ports>,
     pub namespace: String,
 }
-#[derive(Deserialize)]
+
+#[derive(Deserialize, Serialize)]
 pub struct WorkloadDTO {
     pub name: String,
     pub environment: Vec<String>,
