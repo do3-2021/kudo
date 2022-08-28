@@ -12,6 +12,22 @@ pub enum InstanceError {
     SerdeError(serde_json::Error),
 }
 
+impl ToString for InstanceError {
+    fn to_string(&self) -> String {
+        match self {
+            InstanceError::Etcd(err) => {
+                format!("ETCD Error : {}", err)
+            }
+            InstanceError::Grpc(err) => {
+                format!("GRPC Error : {}", err)
+            }
+            InstanceError::SerdeError(err) => {
+                format!("Serde Error : {}", err)
+            }
+            &InstanceError::InstanceNotFound => "Instance not found".to_string(),
+        }
+    }
+}
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Instance {
     pub id: String,

@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug)]
 pub enum WorkloadError {
     WorkloadNotFound,
     Etcd(String),

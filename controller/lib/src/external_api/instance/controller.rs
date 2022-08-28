@@ -1,12 +1,11 @@
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 
-use super::super::workload::model::Workload;
 use super::super::workload::service::WorkloadService;
 use super::model::InstanceDTO;
 use super::service;
 use actix_web::http::StatusCode;
-use actix_web::{body, web, HttpResponse, Responder, Scope};
+use actix_web::{web, HttpResponse, Responder, Scope};
 use tokio::sync::Mutex;
 struct InstanceController {}
 
@@ -15,7 +14,7 @@ impl InstanceController {
     //   let mut instance_service = service::InstanceService::new().await;
     // }
 
-    fn getEtcdAddress() -> SocketAddr {
+    fn get_etcd_address() -> SocketAddr {
         SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0)
     }
 
@@ -24,14 +23,14 @@ impl InstanceController {
         body: web::Json<InstanceDTO>,
     ) -> impl Responder {
         let mut instance_service = service::InstanceService::new("0.0.0.0:50051").await;
-        let mut workload_service = WorkloadService::new(&InstanceController::getEtcdAddress())
+        let mut workload_service = WorkloadService::new(&InstanceController::get_etcd_address())
             .await
             .map_err(|err| {
                 HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
-                    .body("Error creating workload service")
+                    .body(format!("Error creating workload service, {:?}", err))
             })
             .unwrap();
-        let mut id = body.into_inner().id;
+        let id = body.into_inner().id;
 
         //Check if instance exists, otherwise check workloads
         match instance_service.get_instance(&id, &namespace).await  {
@@ -42,28 +41,28 @@ impl InstanceController {
                 )
                 .await
                 {
-                    Ok(_) => return HttpResponse::build(StatusCode::CREATED)
+                    Ok(_) => HttpResponse::build(StatusCode::CREATED)
                         .body("Instance creating and starting..."),
-                    Err(_) => return HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
+                    Err(_) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
                         .body("Internal Server Error"),
                 }
             },
             Err(_) => {
                 match workload_service.get_workload(&id, &namespace).await {
-                    Ok(workload) => {
+                    Ok(_) => {
                         match super::service::InstanceService::retrieve_and_start_instance_from_workload(
                             Arc::new(Mutex::new(instance_service)),
                             &id,
                         )
                         .await
                         {
-                            Ok(_) => return HttpResponse::build(StatusCode::CREATED)
+                            Ok(_) => HttpResponse::build(StatusCode::CREATED)
                                 .body("Instance creating..."),
-                            Err(_) => return HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
+                            Err(_) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
                                 .body("Internal Server Error"),
                         }
                     },
-                    Err(_) => return HttpResponse::build(StatusCode::NOT_FOUND)
+                    Err(_) => HttpResponse::build(StatusCode::NOT_FOUND)
                         .body("Instance not found"),
                 }
             }
@@ -78,13 +77,11 @@ impl InstanceController {
 
         match instance_service.get_instance(&id, &namespace).await {
             Ok(instance) => match instance_service.delete_instance(instance).await {
-                Ok(_) => return HttpResponse::build(StatusCode::OK).body("Instance deleted"),
-                Err(_) => {
-                    return HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
-                        .body("Internal Server Error")
-                }
+                Ok(_) => HttpResponse::build(StatusCode::OK).body("Instance deleted"),
+                Err(_) => HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
+                    .body("Internal Server Error"),
             },
-            Err(_) => return HttpResponse::build(StatusCode::NOT_FOUND).body("Instance not found"),
+            Err(_) => HttpResponse::build(StatusCode::NOT_FOUND).body("Instance not found"),
         }
 
         // match workload_service
@@ -139,11 +136,11 @@ impl InstanceController {
         body: web::Json<InstanceDTO>,
     ) -> impl Responder {
         let mut instance_service = service::InstanceService::new("0.0.0.0:20051").await;
-        let mut workload_service = WorkloadService::new(&InstanceController::getEtcdAddress())
+        let mut workload_service = WorkloadService::new(&InstanceController::get_etcd_address())
             .await
             .map_err(|err| {
                 HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
-                    .body("Error creating workload service")
+                    .body(format!("Error creating workload service {:?}", err))
             })
             .unwrap();
         let instance_dto = body.into_inner();
