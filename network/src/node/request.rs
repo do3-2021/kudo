@@ -1,3 +1,5 @@
+use std::net::Ipv4Addr;
+
 use cidr::Ipv4Inet;
 
 // Setup
@@ -27,6 +29,11 @@ impl SetupIptablesRequest {
     }
 }
 
+pub struct NodeRequest {
+    pub node_id: String,
+    pub node_ip_cidr: Ipv4Inet,
+    pub node_public_ip: Ipv4Addr,
+}
 // Clean up
 pub struct CleanNodeRequest {
     pub node_id: String,
