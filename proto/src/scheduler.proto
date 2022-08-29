@@ -36,6 +36,11 @@ message Port {
     int32 destination = 2;
 }
 
+message Ips {
+    string clusterIp = 1;
+    string publicIp = 2;
+}
+
 message ResourceSummary {
     uint64 cpu = 1;
     uint64 memory = 2;
@@ -69,6 +74,7 @@ message NodeRegisterResponse {
     int32 code = 1;
     string description = 2;
     string subnet = 3;
+    repeated Ips nodesIps = 4;
 }
 
 message NodeUnregisterRequest {
@@ -78,6 +84,7 @@ message NodeUnregisterRequest {
 message NodeUnregisterResponse {
     int32 code = 1;
     string description = 2;
+    repeated Ips nodesIps = 3;
 }
 
 message InstanceIdentifier {
