@@ -1,44 +1,78 @@
-use etcd_client::{Client, DeleteResponse, Error, GetOptions, PutResponse};
-use log::info;
+use etcd_client::{Client, DeleteResponse, GetOptions, PutResponse};
+use log::{debug, trace};
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum EtcdClientError {
+    #[error("Etcd error: {0}")]
+    EtcdError(#[from] etcd_client::Error),
+}
 
 pub struct EtcdClient {
     inner: Client,
 }
 
 impl EtcdClient {
-    pub async fn new(address: String) -> Result<Self, Error> {
-        let inner = Client::connect([address], None).await?;
+    pub async fn new(address: String) -> Result<Self, EtcdClientError> {
+        debug!("Starting etcd client on {}", address);
+
+        let inner = Client::connect([address], None)
+            .await
+            .map_err(EtcdClientError::EtcdError)?;
+
         Ok(Self { inner })
     }
 
     pub async fn get(&mut self, key: &str) -> Option<String> {
-        match self.inner.get(key, None).await {
-            Ok(response) => match response.kvs().first() {
-                Some(first) => first.value_str().ok().map(String::from),
-                None => None,
-            },
-            Err(_) => None,
+        if let Ok(response) = self.inner.get(key, None).await {
+            if let Some(first) = response.kvs().first() {
+                let str = first.value_str().ok().map(|s| s.to_string());
+
+                trace!(
+                    "GET key: {}, value: {}",
+                    key,
+                    str.clone().unwrap_or_default()
+                );
+                str
+            } else {
+                trace!("GET key: {}, value: None", key);
+                None
+            }
+        } else {
+            trace!("GET key: {}, value: None", key);
+            None
         }
     }
-    pub async fn put(&mut self, key: &str, value: &str) -> Result<PutResponse, Error> {
-        info!(
-            "Inserting value in ETCD : Key \"{}\" associated with value \"{}\"",
-            key, value
-        );
-        self.inner.put(key, value, None).await
+    pub async fn put(&mut self, key: &str, value: &str) -> Result<PutResponse, EtcdClientError> {
+        trace!("PUT key: {}, value: {}", key, value);
+        self.inner.put(key, value, None).await.map_err(|err| {
+            let err = EtcdClientError::EtcdError(err);
+            trace!("PUT key: {}, error: {}", key, err);
+            err
+        })
     }
     pub async fn delete(&mut self, key: &str) -> Option<DeleteResponse> {
         match self.get(key).await {
             Some(_) => match self.inner.delete(key, None).await {
-                Ok(response) => Some(response),
-                Err(_) => None,
+                Ok(response) => {
+                    trace!("DELETE key: {}, response: {:?}", key, response);
+                    Some(response)
+                }
+                Err(_) => {
+                    trace!("DELETE key: {}, response: None", key);
+                    None
+                }
             },
-            None => None,
+            None => {
+                trace!("DELETE key: {}, response: None", key);
+                None
+            }
         }
     }
 
     pub async fn get_all(&mut self) -> Option<Vec<String>> {
-        info!("Retrieving all keys in ETCD");
+        trace!("Getting all keys");
+
         let resp = self
             .inner
             .get("", Some(GetOptions::new().with_all_keys()))

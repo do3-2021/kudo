@@ -418,16 +418,16 @@ impl Orchestrator {
         };
 
         for instance_proxied in instances_scheduled.instances.get_all().values() {
-            match instance_proxied.instance.resource.clone() {
-                Some(resource) => match resource.limit {
-                    Some(limit) => {
-                        sum_instances_resource_limit.cpu += limit.cpu;
-                        sum_instances_resource_limit.memory += limit.memory;
-                        sum_instances_resource_limit.disk += limit.disk;
-                    }
-                    None => {}
-                },
-                None => {}
+            if let Some(limit) = instance_proxied
+                .instance
+                .resource
+                .clone()
+                .unwrap_or_default()
+                .limit
+            {
+                sum_instances_resource_limit.cpu += limit.cpu;
+                sum_instances_resource_limit.memory += limit.memory;
+                sum_instances_resource_limit.disk += limit.disk;
             }
         }
 

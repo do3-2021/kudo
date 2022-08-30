@@ -1,34 +1,15 @@
+use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 
-use super::super::instance::model::Instance;
-
-#[derive(Debug)]
-pub enum NodeError {
-    NodeNotFound,
-    Etcd(String),
-    SerdeError(serde_json::Error),
-}
-
-impl ToString for NodeError {
-    fn to_string(&self) -> String {
-        match self {
-            NodeError::Etcd(err) => {
-                format!("ETCD Error : {}", err)
-            }
-            NodeError::SerdeError(err) => {
-                format!("Serde Error : {}", err)
-            }
-            &NodeError::NodeNotFound => "Node not found".to_string(),
-        }
-    }
-}
+use crate::external_api::generic::model::{APIResponse, APIResponseMetadata};
+use crate::external_api::instance::model::Instance;
 
 #[derive(Deserialize, Serialize)]
 pub struct NodeDTO {
     pub id: String,
 }
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 
 pub struct ResourceSummary {
     pub cpu: i64,
@@ -36,13 +17,13 @@ pub struct ResourceSummary {
     pub disk: i64,
 }
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Resource {
     pub usage: ResourceSummary,
     pub limit: ResourceSummary,
 }
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub enum NodeState {
     REGISTERING = 0,
     REGISTERED = 1,
@@ -51,11 +32,27 @@ pub enum NodeState {
     FAILING = 4,
 }
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct NodeStatus {
     pub id: String,
     pub state: NodeState,
     pub status_description: String,
     pub resource: Resource,
     pub instances: Vec<Instance>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct NodeVector {
+    pub nodes: Vec<NodeStatus>,
+}
+impl NodeVector {
+    pub fn new(nodes: Vec<NodeStatus>) -> NodeVector {
+        NodeVector { nodes }
+    }
+    pub fn to_http(self) -> HttpResponse {
+        HttpResponse::Ok().json(APIResponse {
+            data: self,
+            metadata: APIResponseMetadata::default(),
+        })
+    }
 }

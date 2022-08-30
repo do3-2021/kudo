@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 /// * `status_description`: A text containing details on the status.
 /// * `resource`: The resource used by the node.
 /// * `instances`: A list of instances that are running on the node.
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct NodeStatus {
     pub id: String,
     pub state: NodeState,
@@ -25,7 +25,7 @@ pub struct NodeStatus {
 ///
 /// * `limit`: The maximum amount of resources that this node is allowed to use.
 /// * `usage`: The amount of resources currently being used by the node.
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Resource {
     pub limit: Option<ResourceSummary>,
     pub usage: Option<ResourceSummary>,
@@ -38,14 +38,14 @@ pub struct Resource {
 /// * `cpu`: A number in milliCPU that represents a CPU.
 /// * `memory`: A number in bytes that represents a memory space.
 /// * `disk`: A number in bytes that represents a disk space.
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct ResourceSummary {
     pub cpu: u64,
     pub memory: u64,
     pub disk: u64,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct InstanceIdentifier {
     pub id: String,
 }

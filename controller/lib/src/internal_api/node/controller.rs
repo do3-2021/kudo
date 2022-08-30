@@ -1,24 +1,16 @@
-use log::{error, info};
+use log::{debug, error, info};
+use std::net::SocketAddr;
 use std::sync::Arc;
-use std::{fmt::Display, net::SocketAddr};
+use thiserror::Error;
 use tokio::sync::Mutex;
 use tonic::{Code, Request, Response, Status, Streaming};
 
 use super::service::NodeService;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum NodeControllerError {
+    #[error("Node service error: {0}")]
     NodeServiceError(super::service::NodeServiceError),
-}
-
-impl Display for NodeControllerError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            NodeControllerError::NodeServiceError(err) => {
-                write!(f, "NodeServiceError: {}", err)
-            }
-        }
-    }
 }
 
 /// Handles gRPC requests from the scheduler for the node service.
@@ -60,32 +52,27 @@ impl proto::controller::node_service_server::NodeService for NodeController {
         &self,
         request: Request<Streaming<proto::controller::NodeStatus>>,
     ) -> Result<Response<()>, Status> {
-        let remote_address = if let Some(remote_address) = request.remote_addr() {
-            remote_address.to_string()
-        } else {
-            error!("\"update_node_status\" Failed to get remote address");
-            "Error getting remote address".to_string()
-        };
-
-        info!(
-            "{} \"update_node_status\" streaming initiated",
-            remote_address
-        );
-
         let stream = request.into_inner();
 
-        self.node_service
+        debug!("Received node status update stream: {:?}", stream);
+
+        let node_id = self
+            .node_service
             .clone()
             .lock()
             .await
-            .update_node_status(stream, remote_address)
+            .update_node_status(stream)
             .await
             .map_err(|err| {
+                error!("Error updating node status: {}", err);
                 Status::new(
                     Code::Internal,
                     NodeControllerError::NodeServiceError(err).to_string(),
                 )
             })?;
+
+        debug!("Node status update stream closed for Node {}", node_id);
+        info!("Node {} is now unregistered", node_id);
 
         Ok(Response::new(()))
     }

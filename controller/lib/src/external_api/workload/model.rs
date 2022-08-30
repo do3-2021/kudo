@@ -1,49 +1,8 @@
 use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
-pub enum WorkloadError {
-    WorkloadNotFound,
-    Etcd(String),
-    NameAlreadyExists(String),
-    JsonToWorkload(String),
-    WorkloadToJson(String),
-    NamespaceService,
-    NamespaceNotFound,
-}
+use crate::external_api::generic::model::{APIResponse, APIResponseMetadata};
 
-impl WorkloadError {
-    pub fn to_http(&self) -> HttpResponse {
-        match self {
-            WorkloadError::WorkloadNotFound => {
-                HttpResponse::NotFound().body("{\"error\":\"Workload not found\"}")
-            }
-            WorkloadError::Etcd(err) => HttpResponse::InternalServerError()
-                .body(format!("{{\"error\":\"Etcd error: {} \"}}", err)),
-            WorkloadError::NameAlreadyExists(name) => HttpResponse::Conflict().body(format!(
-                "{{\"error\":\"Workload with name {} already exists\"}}",
-                name
-            )),
-            WorkloadError::JsonToWorkload(err) => {
-                HttpResponse::InternalServerError().body(format!(
-                    "{{\"error\":\"Error while converting JSON string to Workload : {}\"}}",
-                    err
-                ))
-            }
-            WorkloadError::WorkloadToJson(err) => {
-                HttpResponse::InternalServerError().body(format!(
-                    "{{\"error\":\"Error while converting the Workload to JSON: {}\"}}",
-                    err
-                ))
-            }
-            WorkloadError::NamespaceService => HttpResponse::InternalServerError()
-                .body("{\"error\":\"Cannot create a NamespaceService instance\"}"),
-            WorkloadError::NamespaceNotFound => {
-                HttpResponse::NotFound().body("{\"error\":\"Namespace not found\"}")
-            }
-        }
-    }
-}
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub enum Type {
     Container = 0,
@@ -70,17 +29,7 @@ pub struct Workload {
     pub ports: Vec<Ports>,
     pub namespace: String,
 }
-impl Workload {
-    pub fn to_http(&self) -> HttpResponse {
-        match serde_json::to_string(&self) {
-            Ok(json) => HttpResponse::Ok().body(json),
-            Err(err) => HttpResponse::InternalServerError().body(format!(
-                "{{\"error\":\"Error while converting the Workload to JSON: {}\"}}",
-                err
-            )),
-        }
-    }
-}
+
 #[derive(Deserialize, Serialize)]
 pub struct WorkloadDTO {
     pub name: String,
@@ -99,11 +48,17 @@ impl WorkloadVector {
     }
     pub fn to_http(&self) -> HttpResponse {
         match serde_json::to_string(&self.workloads) {
-            Ok(json) => HttpResponse::Ok().body(json),
-            Err(err) => HttpResponse::InternalServerError().body(format!(
-                "{{\"error\":\"Error while converting the Workload to JSON: {}\"}}",
-                err
-            )),
+            Ok(json) => HttpResponse::Ok().json(APIResponse {
+                data: Some(json),
+                metadata: APIResponseMetadata::default(),
+            }),
+            Err(_) => HttpResponse::InternalServerError().json(APIResponse::<()> {
+                metadata: APIResponseMetadata {
+                    error: Some("Internal Server Error".to_string()),
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
         }
     }
 }

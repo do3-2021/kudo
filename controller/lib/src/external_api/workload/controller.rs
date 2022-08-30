@@ -1,10 +1,58 @@
 use crate::external_api::interface::ActixAppState;
+use crate::external_api::namespace::controller::NamespaceControllerError;
 
-use super::model::WorkloadDTO;
-use super::service::WorkloadService;
-use crate::external_api::generic::model::Pagination;
+use super::model::{Workload, WorkloadDTO};
+use super::service::{WorkloadService, WorkloadServiceError};
+use crate::external_api::generic::model::{APIResponse, APIResponseMetadata, Pagination};
 use actix_web::http::StatusCode;
 use actix_web::{web, HttpResponse, Responder, Scope};
+use log::{debug, error};
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum WorkloadControllerError {
+    #[error("WorkloadServiceError: {0}")]
+    WorkloadServiceError(WorkloadServiceError),
+}
+
+#[allow(clippy::from_over_into)]
+impl Into<HttpResponse> for WorkloadControllerError {
+    fn into(self) -> HttpResponse {
+        let mut response = APIResponse::<()> {
+            metadata: APIResponseMetadata {
+                error: Some("Internal Server Error".to_string()),
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        let mut status_code = StatusCode::INTERNAL_SERVER_ERROR;
+
+        match self {
+            WorkloadControllerError::WorkloadServiceError(err) => match err {
+                WorkloadServiceError::WorkloadNotFound(name) => {
+                    response.metadata.error = Some(format!("Workload {} not found", name));
+                    status_code = StatusCode::NOT_FOUND;
+                    debug!("Workload {} not found", name);
+                }
+                WorkloadServiceError::NameAlreadyExist(name) => {
+                    status_code = StatusCode::CONFLICT;
+                    response.metadata.error =
+                        Some(format!("Workload with name {} already exist", name));
+                    debug!("Workload with name {} already exist", name);
+                }
+                WorkloadServiceError::NamespaceServiceError(err) => {
+                    return NamespaceControllerError::NamespaceServiceError(err).into()
+                }
+                err => {
+                    error!("{}", err);
+                }
+            },
+        }
+
+        HttpResponse::build(status_code).json(response)
+    }
+}
+
 pub struct WorkloadController {}
 impl WorkloadController {
     pub fn services(&self) -> Scope {
@@ -40,14 +88,26 @@ impl WorkloadController {
         let (namespace, workload_id) = params.into_inner();
 
         let mut workload_service = match WorkloadService::new(&data.etcd_address).await {
-            Ok(workload) => workload,
-            Err(e) => return e.to_http(),
+            Ok(service) => service,
+            Err(err) => return WorkloadControllerError::WorkloadServiceError(err).into(),
         };
 
-        workload_service
+        match workload_service
             .get_workload(&workload_id, &namespace)
             .await
-            .map_or_else(|e| e.to_http(), |w| w.to_http())
+        {
+            Ok(workload) => {
+                debug!(
+                    "GET /workload/{}/{}: {:?}",
+                    namespace, workload_id, workload
+                );
+                HttpResponse::build(StatusCode::OK).json(APIResponse::<Workload> {
+                    metadata: APIResponseMetadata::default(),
+                    data: workload,
+                })
+            }
+            Err(err) => WorkloadControllerError::WorkloadServiceError(err).into(),
+        }
     }
 
     /// `put_workload` is an async function that handle **/workload/\<namespace>** route (PUT)
@@ -64,14 +124,23 @@ impl WorkloadController {
         data: web::Data<ActixAppState>,
     ) -> impl Responder {
         let mut workload_service = match WorkloadService::new(&data.etcd_address).await {
-            Ok(workload) => workload,
-            Err(e) => return e.to_http(),
+            Ok(service) => service,
+            Err(err) => return WorkloadControllerError::WorkloadServiceError(err).into(),
         };
+
         let workload_dto = body.into_inner();
-        workload_service
+        match workload_service
             .create_workload(workload_dto, &namespace)
             .await
-            .map_or_else(|e| e.to_http(), |w| w.to_http())
+        {
+            Ok(workload) => {
+                HttpResponse::build(StatusCode::CREATED).json(APIResponse::<Workload> {
+                    data: workload,
+                    metadata: APIResponseMetadata::default(),
+                })
+            }
+            Err(err) => WorkloadControllerError::WorkloadServiceError(err).into(),
+        }
     }
 
     /// `get_all_workloads` is an async function that handle **/workload/\<namespace>** route (GET)
@@ -88,8 +157,8 @@ impl WorkloadController {
         data: web::Data<ActixAppState>,
     ) -> impl Responder {
         let mut workload_service = match WorkloadService::new(&data.etcd_address).await {
-            Ok(workload) => workload,
-            Err(e) => return e.to_http(),
+            Ok(service) => service,
+            Err(err) => return WorkloadControllerError::WorkloadServiceError(err).into(),
         };
 
         match pagination {
@@ -120,17 +189,29 @@ impl WorkloadController {
         data: web::Data<ActixAppState>,
     ) -> impl Responder {
         let mut workload_service = match WorkloadService::new(&data.etcd_address).await {
-            Ok(workload) => workload,
-            Err(e) => return e.to_http(),
+            Ok(service) => service,
+            Err(err) => return WorkloadControllerError::WorkloadServiceError(err).into(),
         };
 
         let (namespace, workload_id) = params.into_inner();
         let workload_dto = body.into_inner();
 
-        workload_service
+        match workload_service
             .update_workload(workload_dto, &workload_id, &namespace)
             .await
-            .map_or_else(|e| e.to_http(), |w| w.to_http())
+        {
+            Ok(workload) => {
+                debug!(
+                    "PATCH /workload/{}/{}: {:?}",
+                    namespace, workload_id, workload
+                );
+                HttpResponse::build(StatusCode::OK).json(APIResponse::<Workload> {
+                    data: workload,
+                    metadata: APIResponseMetadata::default(),
+                })
+            }
+            Err(err) => WorkloadControllerError::WorkloadServiceError(err).into(),
+        }
     }
 
     /// It deletes a workload from etcd
@@ -149,8 +230,8 @@ impl WorkloadController {
         data: web::Data<ActixAppState>,
     ) -> impl Responder {
         let mut workload_service = match WorkloadService::new(&data.etcd_address).await {
-            Ok(workload) => workload,
-            Err(e) => return e.to_http(),
+            Ok(service) => service,
+            Err(err) => return WorkloadControllerError::WorkloadServiceError(err).into(),
         };
 
         let (namespace, workload_id) = params.into_inner();
@@ -158,6 +239,13 @@ impl WorkloadController {
         workload_service
             .delete_workload(&workload_id, &namespace)
             .await;
-        HttpResponse::build(StatusCode::NO_CONTENT).body("{\"message\":\"Remove successfully\"}")
+
+        HttpResponse::build(StatusCode::NO_CONTENT).json(APIResponse::<()> {
+            metadata: APIResponseMetadata {
+                message: Some("Workload successfully deleted".to_string()),
+                ..Default::default()
+            },
+            ..Default::default()
+        })
     }
 }

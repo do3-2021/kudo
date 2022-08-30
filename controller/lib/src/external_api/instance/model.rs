@@ -1,31 +1,11 @@
 use std::net::Ipv4Addr;
 
+use actix_web::HttpResponse;
 use proto::controller::{InstanceState, Type};
 use rand::{distributions::Alphanumeric, Rng};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
-pub enum InstanceError {
-    InstanceNotFound,
-    OutOfRange,
-    Etcd(String),
-    Grpc(String),
-    SerdeError(serde_json::Error),
-    GenerateIp(String),
-}
-
-impl std::fmt::Display for InstanceError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            InstanceError::InstanceNotFound => write!(f, "Instance not found"),
-            InstanceError::OutOfRange => write!(f, "Instance out of range"),
-            InstanceError::Etcd(err) => write!(f, "Etcd error: {}", err),
-            InstanceError::Grpc(err) => write!(f, "Grpc error: {}", err),
-            InstanceError::SerdeError(err) => write!(f, "Serde error: {}", err),
-            InstanceError::GenerateIp(err) => write!(f, "Generate ip error: {}", err),
-        }
-    }
-}
+use crate::external_api::generic::model::{APIResponse, APIResponseMetadata};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Instance {
@@ -41,6 +21,22 @@ pub struct Instance {
     pub ports: Vec<Port>,
     pub ip: Ipv4Addr,
     pub namespace: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct InstanceVector {
+    pub instances: Vec<Instance>,
+}
+impl InstanceVector {
+    pub fn new(instances: Vec<Instance>) -> InstanceVector {
+        InstanceVector { instances }
+    }
+    pub fn to_http(self) -> HttpResponse {
+        HttpResponse::Ok().json(APIResponse::<Vec<Instance>> {
+            data: self.instances,
+            metadata: APIResponseMetadata::default(),
+        })
+    }
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]

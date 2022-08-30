@@ -1,4 +1,11 @@
-use super::model::FilterError;
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum FilterServiceError {
+    #[error("Offset out of range")]
+    OutOfRange,
+}
+
 /// `FilterService` is a struct that can be used as a services to filter result.
 pub struct FilterService {}
 
@@ -50,9 +57,9 @@ impl FilterService {
         &mut self,
         vector: &Vec<T>,
         offset: u32,
-    ) -> Result<Vec<T>, FilterError> {
+    ) -> Result<Vec<T>, FilterServiceError> {
         if offset > vector.len() as u32 {
-            return Err(FilterError::OutOfRange);
+            return Err(FilterServiceError::OutOfRange);
         }
         Ok(vector[offset as usize..].to_vec())
     }

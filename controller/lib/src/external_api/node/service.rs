@@ -1,8 +1,24 @@
 use std::net::SocketAddr;
 
-use crate::{etcd::EtcdClient, external_api::generic::filter::FilterService};
+use log::trace;
+use thiserror::Error;
 
-use super::model::{NodeError, NodeStatus};
+use crate::{
+    etcd::{EtcdClient, EtcdClientError},
+    external_api::generic::filter::FilterService,
+};
+
+use super::model::NodeStatus;
+
+#[derive(Debug, Error)]
+pub enum NodeServiceError {
+    #[error("Etcd error: {0}")]
+    EtcdError(EtcdClientError),
+    #[error("Serde error: {0}")]
+    SerdeError(serde_json::Error),
+    #[error("Node {0} not found")]
+    NodeNotFound(String),
+}
 
 pub struct NodeService {
     pub etcd_service: EtcdClient,
@@ -10,10 +26,10 @@ pub struct NodeService {
 }
 
 impl NodeService {
-    pub async fn new(etcd_address: SocketAddr) -> Result<Self, NodeError> {
+    pub async fn new(etcd_address: SocketAddr) -> Result<Self, NodeServiceError> {
         let etcd_service = EtcdClient::new(etcd_address.to_string())
             .await
-            .map_err(|err| NodeError::Etcd(err.to_string()))?;
+            .map_err(NodeServiceError::EtcdError)?;
 
         Ok(Self {
             etcd_service,
@@ -29,17 +45,19 @@ impl NodeService {
     ///
     /// # Returns:
     ///
-    /// A Result<NodeStatus, NodeError>
+    /// A Result<NodeStatus, NodeServiceError>
 
-    pub async fn get_node(&mut self, node_id: &str) -> Result<NodeStatus, NodeError> {
+    pub async fn get_node(&mut self, node_id: &str) -> Result<NodeStatus, NodeServiceError> {
         match self.etcd_service.get(node_id).await {
             Some(node) => {
                 let node_status: NodeStatus = serde_json::from_str(&node)
-                    .map_err(NodeError::SerdeError)
+                    .map_err(NodeServiceError::SerdeError)
                     .unwrap();
+
+                trace!("Node found: {:?}", node_status);
                 Ok(node_status)
             }
-            None => Err(NodeError::NodeNotFound),
+            None => Err(NodeServiceError::NodeNotFound(node_id.to_string())),
         }
     }
 
@@ -72,6 +90,8 @@ impl NodeService {
                 if limit > 0 {
                     nodes = self.filter_service.limit(&nodes, limit);
                 }
+
+                trace!("Nodes found: {:?}", nodes);
                 nodes
             }
             None => nodes,

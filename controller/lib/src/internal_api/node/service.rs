@@ -2,40 +2,29 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
 
-use log::info;
+use log::{info, trace};
+use thiserror::Error;
 use tokio::sync::Mutex;
 use tokio::time;
 use tonic::Streaming;
 
-use crate::etcd::EtcdClient;
+use crate::etcd::{EtcdClient, EtcdClientError};
+use crate::external_api::instance::service::InstanceServiceError;
 use crate::internal_api::node::model::InstanceIdentifier;
 
-use super::super::super::external_api::instance::{
-    model::Instance, model::InstanceError, service::InstanceService,
-};
+use super::super::super::external_api::instance::{model::Instance, service::InstanceService};
 use super::model::NodeStatus;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum NodeServiceError {
-    EtcdError(etcd_client::Error),
+    #[error("Etcd error: {0}")]
+    EtcdError(EtcdClientError),
+    #[error("Serde error: {0}")]
     SerdeError(serde_json::Error),
+    #[error("Streaming closed: {0}")]
     StreamingClosed(tonic::Status),
-    InstanceServiceError(InstanceError),
-}
-
-impl std::fmt::Display for NodeServiceError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            NodeServiceError::EtcdError(err) => write!(f, "EtcdError: {}", err),
-            NodeServiceError::SerdeError(err) => write!(f, "SerdeError: {}", err),
-            NodeServiceError::InstanceServiceError(_) => {
-                write!(f, "InstanceServiceError")
-            }
-            NodeServiceError::StreamingClosed(err) => {
-                write!(f, "StreamingClosed: {}", err)
-            }
-        }
-    }
+    #[error("InstanceServiceError: {0}")]
+    InstanceServiceError(InstanceServiceError),
 }
 
 pub struct NodeService {
@@ -74,18 +63,18 @@ impl NodeService {
     pub async fn update_node_status(
         &mut self,
         mut stream: Streaming<proto::controller::NodeStatus>,
-        remote_address: String,
-    ) -> Result<(), NodeServiceError> {
+    ) -> Result<String, NodeServiceError> {
         let mut last_instances: Vec<Instance> = vec![];
+        let mut node_id = String::new();
 
         while let Some(node_status) = stream
             .message()
             .await
             .map_err(NodeServiceError::StreamingClosed)?
         {
-            info!("{} \"update_node_status\" received chunk", remote_address);
-
             let node_status = NodeStatus::from(node_status);
+
+            trace!("Node status update: {:?}", node_status);
 
             self.etcd_interface
                 .put(
@@ -106,12 +95,13 @@ impl NodeService {
                     }
                 }
             }
-        }
 
-        info!(
-            "{} \"update_node_status\" streaming closed, rescheduling instances",
-            remote_address.clone()
-        );
+            if node_id.is_empty() {
+                info!("Node {} is now registered", node_status.id);
+            }
+
+            node_id = node_status.id;
+        }
 
         for instance in last_instances {
             InstanceService::schedule_instance(self.instance_service.clone(), instance)
@@ -119,8 +109,8 @@ impl NodeService {
 
         //Delete Node after 5 min
         time::sleep(Duration::from_secs(300)).await;
-        self.etcd_interface.delete(&remote_address).await;
+        self.etcd_interface.delete(&node_id).await;
 
-        Ok(())
+        Ok(node_id)
     }
 }

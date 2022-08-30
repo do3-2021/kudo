@@ -1,11 +1,18 @@
-use super::model::{Instance, InstanceError};
+use super::model::Instance;
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum InstanceFilterServiceError {
+    #[error("Offset out of range")]
+    OffsetOutOfRange,
+}
 
 /// `FilterService` is a struct that can be used as a service in the WorkloadService.
-pub struct FilterService {}
+pub struct InstanceFilterService {}
 
-impl FilterService {
+impl InstanceFilterService {
     pub fn new() -> Self {
-        FilterService {}
+        InstanceFilterService {}
     }
 
     /// It takes a vector of workloads and a limit, and returns a vector of workloads that is limited to the
@@ -45,9 +52,9 @@ impl FilterService {
         &mut self,
         instances: &Vec<Instance>,
         offset: u32,
-    ) -> Result<Vec<Instance>, InstanceError> {
+    ) -> Result<Vec<Instance>, InstanceFilterServiceError> {
         if offset > instances.len() as u32 {
-            return Err(InstanceError::OutOfRange);
+            return Err(InstanceFilterServiceError::OffsetOutOfRange);
         }
         Ok(instances[offset as usize..].to_vec())
     }

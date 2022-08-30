@@ -1,28 +1,16 @@
-use std::fmt::Display;
-
-use log::{error, info};
+use log::{debug, trace};
 use proto::scheduler::instance_service_client::InstanceServiceClient;
 use proto::scheduler::{Instance, InstanceIdentifier, InstanceStatus};
+use thiserror::Error;
 use tonic::transport::{Channel, Error};
 use tonic::{Request, Response, Status, Streaming};
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum SchedulerClientInterfaceError {
+    #[error("Error while creating scheduler client: {0}")]
     ConnectionError(Error),
+    #[error("Error while sending request to scheduler: {0}")]
     RequestFailed(Status),
-}
-
-impl Display for SchedulerClientInterfaceError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SchedulerClientInterfaceError::ConnectionError(error) => {
-                write!(f, "Connection error: {}", error)
-            }
-            SchedulerClientInterfaceError::RequestFailed(status) => {
-                write!(f, "Request failed: {}", status)
-            }
-        }
-    }
 }
 
 pub struct SchedulerClientInterface {
@@ -33,7 +21,7 @@ impl SchedulerClientInterface {
     pub async fn new(
         instance_client_address: String,
     ) -> Result<Self, SchedulerClientInterfaceError> {
-        info!(
+        debug!(
             "Starting gRPC client for scheduler Instance Service on {}",
             instance_client_address,
         );
@@ -49,91 +37,55 @@ impl SchedulerClientInterface {
         &mut self,
         request: Request<Instance>,
     ) -> Result<Response<Streaming<InstanceStatus>>, SchedulerClientInterfaceError> {
-        let remote_address = match request.remote_addr() {
-            Some(addr) => addr.to_string(),
-            None => {
-                error!("\"create_instance\" Failed to get remote address from request");
-                "Error getting address".to_string()
-            }
-        };
-
-        info!(
-            "Calling gRPC procedure \"create_instance\" to {}",
-            remote_address
-        );
-
-        self.instance_client
+        let response = self
+            .instance_client
             .create(request)
             .await
-            .map_err(SchedulerClientInterfaceError::RequestFailed)
+            .map_err(SchedulerClientInterfaceError::RequestFailed)?;
+
+        trace!("create_instance, response: {:?}", response);
+        Ok(response)
     }
 
     pub async fn destroy_instance(
         &mut self,
         request: Request<InstanceIdentifier>,
     ) -> Result<Response<()>, SchedulerClientInterfaceError> {
-        let remote_address = match request.remote_addr() {
-            Some(addr) => addr.to_string(),
-            None => {
-                error!("\"create_instance\" Failed to get remote address from request");
-                "Error getting address".to_string()
-            }
-        };
-
-        info!(
-            "Calling gRPC procedure \"destroy_instance\" to {}",
-            remote_address
-        );
-
-        self.instance_client
+        let response = self
+            .instance_client
             .destroy(request)
             .await
-            .map_err(SchedulerClientInterfaceError::RequestFailed)
+            .map_err(SchedulerClientInterfaceError::RequestFailed)?;
+
+        trace!("destroy_instance, response: {:?}", response);
+        Ok(response)
     }
 
     pub async fn start_instance(
         &mut self,
         request: Request<InstanceIdentifier>,
     ) -> Result<Response<()>, SchedulerClientInterfaceError> {
-        let remote_address = match request.remote_addr() {
-            Some(addr) => addr.to_string(),
-            None => {
-                error!("\"create_instance\" Failed to get remote address from request");
-                "Error getting address".to_string()
-            }
-        };
-
-        info!(
-            "Calling gRPC procedure \"start_instance\" to {}",
-            remote_address
-        );
-
-        self.instance_client
+        let response = self
+            .instance_client
             .start(request)
             .await
-            .map_err(SchedulerClientInterfaceError::RequestFailed)
+            .map_err(SchedulerClientInterfaceError::RequestFailed)?;
+
+        trace!("start_instance, response: {:?}", response);
+        Ok(response)
     }
 
     pub async fn stop_instance(
         &mut self,
         request: Request<InstanceIdentifier>,
     ) -> Result<Response<()>, SchedulerClientInterfaceError> {
-        let remote_address = match request.remote_addr() {
-            Some(addr) => addr.to_string(),
-            None => {
-                error!("\"create_instance\" Failed to get remote address from request");
-                "Error getting address".to_string()
-            }
-        };
-
-        info!(
-            "Calling gRPC procedure \"stop_instance\" to {}",
-            remote_address
-        );
-
-        self.instance_client
+        let response = self
+            .instance_client
             .stop(request)
             .await
-            .map_err(SchedulerClientInterfaceError::RequestFailed)
+            .map_err(SchedulerClientInterfaceError::RequestFailed)?;
+
+        trace!("stop_instance, response: {:?}", response);
+        Ok(response)
     }
 }

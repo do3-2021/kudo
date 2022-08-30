@@ -1,20 +1,38 @@
 use std::net::{Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 
-use super::filter::FilterService;
-use super::model::{Instance, InstanceError};
-use crate::etcd::EtcdClient;
+use super::filter::InstanceFilterService;
+use super::model::Instance;
+use crate::etcd::{EtcdClient, EtcdClientError};
 use crate::external_api::workload::model::Workload;
-use crate::grpc_client::interface::SchedulerClientInterface;
+use crate::grpc_client::interface::{SchedulerClientInterface, SchedulerClientInterfaceError};
+use log::{debug, trace};
 use proto::controller::InstanceState;
 use serde_json;
+use thiserror::Error;
 use tokio::sync::Mutex;
-use tonic::Request;
+use tonic::{Request, Status};
+
+#[derive(Debug, Error)]
+pub enum InstanceServiceError {
+    #[error("Etcd client error: {0}")]
+    EtcdError(EtcdClientError),
+    #[error("Serde error: {0}")]
+    SerdeError(serde_json::Error),
+    #[error("Scheduler client error: {0}")]
+    SchedulerClientInterfaceError(SchedulerClientInterfaceError),
+    #[error("Workload {0} not found")]
+    WorkloadNotFound(String),
+    #[error("Instance {0} not found")]
+    InstanceNotFound(String),
+    #[error("Stream error: {0}")]
+    StreamError(Status),
+}
 
 pub struct InstanceService {
     grpc_service: SchedulerClientInterface,
     etcd_service: EtcdClient,
-    filter_service: FilterService,
+    filter_service: InstanceFilterService,
 }
 
 // `InstanceService` is a struct that is inspired from Controllers Provider Modules architectures. It is used as a service in the InstanceController. A service can use other services.
@@ -25,15 +43,18 @@ pub struct InstanceService {
 /// * `filter_service`: This is the service that will be used to filter the instances.
 
 impl InstanceService {
-    pub async fn new(grpc_address: &str, etcd_address: &SocketAddr) -> Result<Self, InstanceError> {
+    pub async fn new(
+        grpc_address: &str,
+        etcd_address: &SocketAddr,
+    ) -> Result<Self, InstanceServiceError> {
         Ok(InstanceService {
             grpc_service: SchedulerClientInterface::new(grpc_address.to_string())
                 .await
-                .map_err(|err| InstanceError::Grpc(err.to_string()))?,
+                .map_err(InstanceServiceError::SchedulerClientInterfaceError)?,
             etcd_service: EtcdClient::new(etcd_address.to_string())
                 .await
-                .map_err(|err| InstanceError::Etcd(err.to_string()))?,
-            filter_service: FilterService::new(),
+                .map_err(InstanceServiceError::EtcdError)?,
+            filter_service: InstanceFilterService::new(),
         })
     }
 
@@ -42,14 +63,13 @@ impl InstanceService {
     /// It stores the last ip used in ETCD and increment it by 1 every time it is used .
     /// * Get all workload in the namespace
     /// # Return
-    /// An Result<Ipv4Addr, InstanceError>
-    pub async fn generate_ip(&mut self) -> Result<Ipv4Addr, InstanceError> {
+    /// An Result<Ipv4Addr, InstanceServiceError>
+    pub async fn generate_ip(&mut self) -> Result<Ipv4Addr, InstanceServiceError> {
         let mut ip = Ipv4Addr::new(10, 0, 0, 1);
         match self.etcd_service.get("last_ip").await {
             Some(value) => {
-                let ip_address: Ipv4Addr = serde_json::from_str(&value)
-                    .map_err(InstanceError::SerdeError)
-                    .unwrap();
+                let ip_address: Ipv4Addr =
+                    serde_json::from_str(&value).map_err(InstanceServiceError::SerdeError)?;
                 let mut octets = ip_address.octets();
                 for i in 0..3 {
                     if octets[3 - i] < 255 {
@@ -63,24 +83,20 @@ impl InstanceService {
                 self.etcd_service
                     .put(
                         "last_ip",
-                        &serde_json::to_string(&ip)
-                            .map_err(InstanceError::SerdeError)
-                            .unwrap(),
+                        &serde_json::to_string(&ip).map_err(InstanceServiceError::SerdeError)?,
                     )
                     .await
-                    .map_err(|err| InstanceError::Etcd(err.to_string()))?;
+                    .map_err(InstanceServiceError::EtcdError)?;
                 Ok(ip)
             }
             None => {
                 self.etcd_service
                     .put(
                         "last_ip",
-                        &serde_json::to_string(&ip)
-                            .map_err(InstanceError::SerdeError)
-                            .unwrap(),
+                        &serde_json::to_string(&ip).map_err(InstanceServiceError::SerdeError)?,
                     )
                     .await
-                    .map_err(|err| InstanceError::Etcd(err.to_string()))?;
+                    .map_err(InstanceServiceError::EtcdError)?;
                 Ok(ip)
             }
         }
@@ -99,15 +115,8 @@ impl InstanceService {
     pub async fn retrieve_and_start_instance_from_workload(
         this: Arc<Mutex<Self>>,
         workload_id: &str,
-    ) -> Result<(), InstanceError> {
-        let ip = this
-            .clone()
-            .lock()
-            .await
-            .generate_ip()
-            .await
-            .map_err(|err| InstanceError::GenerateIp(err.to_string()))
-            .unwrap();
+    ) -> Result<(), InstanceServiceError> {
+        let ip = this.clone().lock().await.generate_ip().await?;
         match this
             .clone()
             .lock()
@@ -120,12 +129,14 @@ impl InstanceService {
                 let workload_parsed: Workload = serde_json::from_str(&workload).unwrap();
                 let mut instance = Instance::from(workload_parsed);
                 instance.ip = ip;
-                log::info!("Instance retrieved from workload: {:?}", instance);
                 Self::schedule_instance(this, instance);
 
+                trace!("Instance creating from workload {}", workload);
                 Ok(())
             }
-            None => Err(InstanceError::InstanceNotFound),
+            None => Err(InstanceServiceError::WorkloadNotFound(
+                workload_id.to_string(),
+            )),
         }
     }
 
@@ -146,7 +157,7 @@ impl InstanceService {
                     .grpc_service
                     .create_instance(Request::new(Instance::into(instance.clone())))
                     .await
-                    .map_err(|err| InstanceError::Grpc(err.to_string()))
+                    .map_err(InstanceServiceError::SchedulerClientInterfaceError)
                     .unwrap()
                     .into_inner();
 
@@ -155,7 +166,7 @@ impl InstanceService {
                 while let Some(instance_status) = stream
                     .message()
                     .await
-                    .map_err(|err| InstanceError::Grpc(err.to_string()))
+                    .map_err(InstanceServiceError::StreamError)
                     .unwrap()
                 {
                     instance.update_instance(instance_status.clone());
@@ -167,12 +178,14 @@ impl InstanceService {
                         .put(
                             &instance.id,
                             &serde_json::to_string(&instance)
-                                .map_err(InstanceError::SerdeError)
+                                .map_err(InstanceServiceError::SerdeError)
                                 .unwrap(),
                         )
                         .await
-                        .map_err(|err| InstanceError::Etcd(err.to_string()))
+                        .map_err(InstanceServiceError::EtcdError)
                         .unwrap();
+
+                    trace!("Instance status received : {:?}", instance);
 
                     last_state = InstanceState::from_i32(instance_status.status)
                         .unwrap_or(InstanceState::Scheduling);
@@ -184,6 +197,8 @@ impl InstanceService {
 
                 instance.num_restarts += 1;
 
+                debug!("Restarting instance {}", instance.id);
+
                 this.clone()
                     .lock()
                     .await
@@ -191,11 +206,11 @@ impl InstanceService {
                     .put(
                         &instance.id,
                         &serde_json::to_string(&instance)
-                            .map_err(InstanceError::SerdeError)
+                            .map_err(InstanceServiceError::SerdeError)
                             .unwrap(),
                     )
                     .await
-                    .map_err(|err| InstanceError::Grpc(err.to_string()))
+                    .map_err(InstanceServiceError::EtcdError)
                     .unwrap();
             }
         });
@@ -210,22 +225,23 @@ impl InstanceService {
     /// # Returns:
     ///
     /// A Result.
-    pub async fn delete_instance(&mut self, instance: Instance) -> Result<(), InstanceError> {
-        match self.etcd_service.delete(instance.id.as_str()).await {
-            Some(_) => {
-                match self
-                    .grpc_service
-                    .destroy_instance(Request::new(proto::scheduler::InstanceIdentifier {
-                        id: instance.id,
-                    }))
-                    .await
-                {
-                    Ok(_) => Ok(()),
-                    Err(_) => Err(InstanceError::Grpc("Error stopping instance".to_string())),
-                }
-            }
-            None => Err(InstanceError::InstanceNotFound),
-        }
+    pub async fn delete_instance(
+        &mut self,
+        instance: Instance,
+    ) -> Result<(), InstanceServiceError> {
+        self.etcd_service
+            .delete(&instance.id)
+            .await
+            .ok_or_else(|| InstanceServiceError::InstanceNotFound(instance.clone().id))?;
+        self.grpc_service
+            .destroy_instance(Request::new(proto::scheduler::InstanceIdentifier {
+                id: instance.clone().id,
+            }))
+            .await
+            .map_err(InstanceServiceError::SchedulerClientInterfaceError)?;
+
+        trace!("Instance {:?} deleted", instance);
+        Ok(())
     }
 
     /// Get an instance by it's name
@@ -237,17 +253,25 @@ impl InstanceService {
     /// # Returns:
     ///
     /// A Instance.
-    pub async fn get_instance(&mut self, instance_name: &str) -> Result<Instance, InstanceError> {
+    pub async fn get_instance(
+        &mut self,
+        instance_name: &str,
+    ) -> Result<Instance, InstanceServiceError> {
         match self
             .etcd_service
             .get(format!("instance.{}", instance_name).as_str())
             .await
         {
-            Some(instance_str) => match serde_json::from_str::<Instance>(&instance_str) {
-                Ok(instance) => Ok(instance),
-                Err(_) => Err(InstanceError::InstanceNotFound),
-            },
-            None => Err(InstanceError::InstanceNotFound),
+            Some(instance_str) => {
+                let instance = serde_json::from_str::<Instance>(&instance_str)
+                    .map_err(InstanceServiceError::SerdeError)?;
+
+                trace!("Instance found: {:?}", instance);
+                Ok(instance)
+            }
+            None => Err(InstanceServiceError::InstanceNotFound(
+                instance_name.to_string(),
+            )),
         }
     }
 
@@ -290,6 +314,8 @@ impl InstanceService {
             }
             None => return vec![],
         }
+
+        trace!("Instances found : {:?}", vec);
         vec
     }
 }

@@ -1,9 +1,26 @@
-use super::model::{Ressources, Type, Workload, WorkloadDTO, WorkloadError, WorkloadVector};
-use crate::etcd::EtcdClient;
-use crate::external_api::generic::filter::FilterService;
-use crate::external_api::namespace::service::NamespaceService;
-use serde_json;
 use std::net::SocketAddr;
+
+use super::model::{Ressources, Type, Workload, WorkloadDTO, WorkloadVector};
+use crate::etcd::{EtcdClient, EtcdClientError};
+use crate::external_api::generic::filter::FilterService;
+use crate::external_api::namespace::service::{NamespaceService, NamespaceServiceError};
+use log::trace;
+use serde_json;
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum WorkloadServiceError {
+    #[error("Etcd error: {0}")]
+    EtcdError(EtcdClientError),
+    #[error("Serde error: {0}")]
+    SerdeError(serde_json::Error),
+    #[error("Workload {0} not found")]
+    WorkloadNotFound(String),
+    #[error("Workload with name {0} already exists")]
+    NameAlreadyExist(String),
+    #[error("Namespace service error: {0}")]
+    NamespaceServiceError(NamespaceServiceError),
+}
 
 /// `WorkloadService` is a struct that inpired from Controllers Provider Modules architectures. It can be used as a service in the WorkloadController .A service can use other services.
 /// Properties:
@@ -17,15 +34,15 @@ pub struct WorkloadService {
 }
 
 impl WorkloadService {
-    pub async fn new(etcd_address: &SocketAddr) -> Result<WorkloadService, WorkloadError> {
+    pub async fn new(etcd_address: &SocketAddr) -> Result<WorkloadService, WorkloadServiceError> {
         let inner = WorkloadService {
             etcd_service: EtcdClient::new(etcd_address.to_string())
                 .await
-                .map_err(|err| WorkloadError::Etcd(err.to_string()))?,
+                .map_err(WorkloadServiceError::EtcdError)?,
             filter_service: FilterService::new(),
             namespace_service: NamespaceService::new(etcd_address)
                 .await
-                .map_err(|_| WorkloadError::NamespaceService)?,
+                .map_err(WorkloadServiceError::NamespaceServiceError)?,
         };
         Ok(inner)
     }
@@ -33,25 +50,30 @@ impl WorkloadService {
         &mut self,
         workload_name: &str,
         namespace: &str,
-    ) -> Result<Workload, WorkloadError> {
+    ) -> Result<Workload, WorkloadServiceError> {
         let id = self.id(workload_name, namespace);
         //check if namespace exists
         self.namespace_service
             .namespace(namespace)
             .await
-            .map_err(|_| WorkloadError::NamespaceNotFound)?;
+            .map_err(WorkloadServiceError::NamespaceServiceError)?;
 
         match self.etcd_service.get(&id).await {
             Some(workload) => {
-                let workload: Workload = serde_json::from_str(&workload)
-                    .map_err(|err| WorkloadError::JsonToWorkload(err.to_string()))?;
+                let workload: Workload =
+                    serde_json::from_str(&workload).map_err(WorkloadServiceError::SerdeError)?;
                 if workload.namespace == namespace {
+                    trace!("Workload found: {:?}", workload);
                     Ok(workload)
                 } else {
-                    Err(WorkloadError::WorkloadNotFound)
+                    Err(WorkloadServiceError::WorkloadNotFound(
+                        workload_name.to_string(),
+                    ))
                 }
             }
-            None => Err(WorkloadError::WorkloadNotFound),
+            None => Err(WorkloadServiceError::WorkloadNotFound(
+                workload_name.to_string(),
+            )),
         }
     }
 
@@ -92,6 +114,8 @@ impl WorkloadService {
                 if limit > 0 {
                     new_vec = self.filter_service.limit(&new_vec, limit);
                 }
+
+                trace!("Workloads found: {:?}", new_vec);
                 WorkloadVector::new(new_vec)
             }
             None => WorkloadVector::new(vec![]),
@@ -112,12 +136,12 @@ impl WorkloadService {
         &mut self,
         workload_dto: WorkloadDTO,
         namespace: &str,
-    ) -> Result<Workload, WorkloadError> {
+    ) -> Result<Workload, WorkloadServiceError> {
         let new_id = self.id(&workload_dto.name, namespace);
         match self.get_workload(&workload_dto.name, namespace).await {
-            Ok(workload) => Err(WorkloadError::NameAlreadyExists(workload.name)),
+            Ok(workload) => Err(WorkloadServiceError::NameAlreadyExist(workload.name)),
             Err(err) => match err {
-                WorkloadError::WorkloadNotFound => {
+                WorkloadServiceError::WorkloadNotFound(_) => {
                     let workload = Workload {
                         id: new_id.to_string(),
                         name: workload_dto.name,
@@ -133,11 +157,13 @@ impl WorkloadService {
                         namespace: namespace.to_string(),
                     };
                     let json = serde_json::to_string(&workload)
-                        .map_err(|err| WorkloadError::WorkloadToJson(err.to_string()))?;
+                        .map_err(WorkloadServiceError::SerdeError)?;
                     self.etcd_service
                         .put(&new_id, &json)
                         .await
-                        .map_err(|err| WorkloadError::Etcd(err.to_string()))?;
+                        .map_err(WorkloadServiceError::EtcdError)?;
+
+                    trace!("Workload created: {:?}", workload);
                     Ok(workload)
                 }
                 _ => Err(err),
@@ -161,7 +187,7 @@ impl WorkloadService {
         workload_dto: WorkloadDTO,
         workload_name: &str,
         namespace: &str,
-    ) -> Result<Workload, WorkloadError> {
+    ) -> Result<Workload, WorkloadServiceError> {
         // we get the id before update , and the new id after update
         let new_id = self.id(&workload_dto.name, namespace);
         self.get_workload(workload_name, namespace).await?;
@@ -179,13 +205,14 @@ impl WorkloadService {
             ports: workload_dto.ports.to_vec(),
             namespace: namespace.to_string(),
         };
-        let json = serde_json::to_string(&workload)
-            .map_err(|err| WorkloadError::WorkloadToJson(err.to_string()))?;
+        let json = serde_json::to_string(&workload).map_err(WorkloadServiceError::SerdeError)?;
         self.delete_workload(workload_name, namespace).await;
         self.etcd_service
             .put(&new_id, &json)
             .await
-            .map_err(|err| WorkloadError::Etcd(err.to_string()))?;
+            .map_err(WorkloadServiceError::EtcdError)?;
+
+        trace!("Workload updated: {:?}", workload);
         Ok(workload)
     }
 

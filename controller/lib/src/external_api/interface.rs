@@ -1,4 +1,4 @@
-use crate::etcd::EtcdClient;
+use crate::etcd::{EtcdClient, EtcdClientError};
 use crate::external_api::namespace::model::{Metadata, Namespace};
 
 use super::namespace;
@@ -7,11 +7,16 @@ use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpResponse, HttpServer};
 use log::info;
 use std::net::SocketAddr;
+use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ExternalAPIInterfaceError {
-    EtcdError(etcd_client::Error),
+    #[error("Etcd client error: {0}")]
+    EtcdError(EtcdClientError),
+    #[error("Serde error: {0}")]
     SerdeError(serde_json::Error),
+    #[error("Error while creating external API interface: {0}")]
+    ConnectionError(tokio::io::Error),
 }
 
 pub struct ExternalAPIInterface {}
@@ -73,7 +78,7 @@ impl ExternalAPIInterface {
         .unwrap()
         .run()
         .await
-        .unwrap();
+        .map_err(ExternalAPIInterfaceError::ConnectionError)?;
 
         Ok(Self {})
     }

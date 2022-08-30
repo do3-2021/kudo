@@ -1,19 +1,31 @@
 use std::net::SocketAddr;
 
-use super::node::controller::NodeController;
+use super::node::controller::{NodeController, NodeControllerError};
+
 use log::info;
 use proto::controller::node_service_server::NodeServiceServer;
+use thiserror::Error;
+use tokio::task::JoinError;
 use tonic::transport::Server;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum InternalAPIInterfaceError {
-    NodeControllerError(super::node::controller::NodeControllerError),
+    #[error("NodeControllerError: {0}")]
+    NodeControllerError(NodeControllerError),
+    #[error("Thread panicked with error {0}")]
+    ThreadError(JoinError),
+    #[error("Error while creating gRPC server: {0}")]
+    GrpcServeError(tonic::transport::Error),
 }
 
 pub struct InternalAPIInterface {}
 
 impl InternalAPIInterface {
-    pub fn new(address: SocketAddr, etcd_address: SocketAddr, grpc_address: String) -> Self {
+    pub async fn new(
+        address: SocketAddr,
+        etcd_address: SocketAddr,
+        grpc_address: String,
+    ) -> Result<Self, InternalAPIInterfaceError> {
         info!("Starting gRPC server listening on {}", address);
 
         tokio::spawn(async move {
@@ -26,9 +38,12 @@ impl InternalAPIInterface {
                 ))
                 .serve(address)
                 .await
+                .map_err(InternalAPIInterfaceError::GrpcServeError)
                 .unwrap();
-        });
+        })
+        .await
+        .map_err(InternalAPIInterfaceError::ThreadError)?;
 
-        Self {}
+        Ok(Self {})
     }
 }
