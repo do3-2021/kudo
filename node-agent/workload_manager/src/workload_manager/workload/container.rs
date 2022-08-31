@@ -138,7 +138,7 @@ async fn create_container(
         ports.insert(
             port.destination.to_string(),
             Some(vec![bollard::service::PortBinding {
-                host_port: Some(port.destination.to_string()),
+                host_port: Some(port.source.to_string()),
                 ..Default::default()
             }]),
         );
