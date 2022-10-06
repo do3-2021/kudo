@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
-use crate::external_api::generic::model::{APIResponse, APIResponseMetadata};
+use crate::external_api::generic::model::{APIResponse, APIResponseMetadata, Pagination};
 use crate::external_api::interface::ActixAppState;
 use crate::external_api::workload::controller::WorkloadControllerError;
 use crate::external_api::workload::service::WorkloadServiceError;
 
 use super::super::workload::service::WorkloadService;
-use super::model::{Instance, InstanceDTO, InstanceVector, Pagination};
+use super::model::{Instance, InstanceDTO};
 use super::service::{InstanceService, InstanceServiceError};
 use actix_web::http::StatusCode;
 use actix_web::{web, HttpResponse, Responder, Scope};
@@ -224,19 +224,21 @@ impl InstanceController {
                 }
             };
 
-        match pagination {
+        let instances = match pagination {
             Some(pagination) => {
-                let instances = instance_service
+                instance_service
                     .get_instances(pagination.limit, pagination.offset, &namespace)
-                    .await;
-
-                InstanceVector::new(instances).to_http()
+                    .await
             }
-            None => {
-                let instances = instance_service.get_instances(0, 0, &namespace).await;
+            None => instance_service.get_instances(0, 0, &namespace).await,
+        };
 
-                InstanceVector::new(instances).to_http()
-            }
-        }
+        HttpResponse::build(StatusCode::OK).body(
+            serde_json::to_string(&APIResponse::<Vec<Instance>> {
+                data: instances,
+                metadata: APIResponseMetadata::default(),
+            })
+            .unwrap_or_default(),
+        )
     }
 }

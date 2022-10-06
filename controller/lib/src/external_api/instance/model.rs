@@ -1,11 +1,13 @@
 use std::net::Ipv4Addr;
 
-use actix_web::HttpResponse;
 use proto::controller::{InstanceState, Type};
 use rand::{distributions::Alphanumeric, Rng};
 use serde::{Deserialize, Serialize};
 
-use crate::external_api::generic::model::{APIResponse, APIResponseMetadata};
+#[derive(Deserialize, Serialize)]
+pub struct InstanceDTO {
+    pub workload_name: String,
+}
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Instance {
@@ -23,38 +25,10 @@ pub struct Instance {
     pub namespace: String,
 }
 
-#[derive(Deserialize, Serialize)]
-pub struct InstanceVector {
-    pub instances: Vec<Instance>,
-}
-impl InstanceVector {
-    pub fn new(instances: Vec<Instance>) -> InstanceVector {
-        InstanceVector { instances }
-    }
-    pub fn to_http(self) -> HttpResponse {
-        HttpResponse::Ok().json(APIResponse::<Vec<Instance>> {
-            data: self.instances,
-            metadata: APIResponseMetadata::default(),
-        })
-    }
-}
-
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Resource {
     pub limit: Option<ResourceSummary>,
     pub usage: Option<ResourceSummary>,
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct InstanceDTO {
-    pub workload_name: String,
-}
-
-#[derive(Deserialize, Serialize)]
-
-pub struct Pagination {
-    pub limit: u32,
-    pub offset: u32,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]

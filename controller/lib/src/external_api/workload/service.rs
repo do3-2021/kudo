@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 
-use super::model::{Ressources, Type, Workload, WorkloadDTO, WorkloadVector};
+use super::model::{Ressources, Type, Workload, WorkloadDTO};
 use crate::etcd::{EtcdClient, EtcdClientError};
 use crate::external_api::generic::filter::FilterService;
 use crate::external_api::namespace::service::{NamespaceService, NamespaceServiceError};
@@ -93,7 +93,7 @@ impl WorkloadService {
         limit: u32,
         offset: u32,
         namespace: &str,
-    ) -> WorkloadVector {
+    ) -> Vec<Workload> {
         let mut new_vec: Vec<Workload> = Vec::new();
         match self.etcd_service.get_all().await {
             Some(workloads) => {
@@ -108,7 +108,7 @@ impl WorkloadService {
                 if offset > 0 {
                     match self.filter_service.offset(&new_vec, offset) {
                         Ok(workloads) => new_vec = workloads,
-                        Err(_) => return WorkloadVector::new(vec![]),
+                        Err(_) => return vec![],
                     }
                 }
                 if limit > 0 {
@@ -116,9 +116,9 @@ impl WorkloadService {
                 }
 
                 trace!("Workloads found: {:?}", new_vec);
-                WorkloadVector::new(new_vec)
+                new_vec
             }
-            None => WorkloadVector::new(vec![]),
+            None => vec![],
         }
     }
 

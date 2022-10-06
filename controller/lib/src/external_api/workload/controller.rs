@@ -161,18 +161,22 @@ impl WorkloadController {
             Err(err) => return WorkloadControllerError::WorkloadServiceError(err).into(),
         };
 
-        match pagination {
+        let workloads = match pagination {
             Some(pagination) => {
-                let workloads = workload_service
+                workload_service
                     .get_all_workloads(pagination.limit, pagination.offset, &namespace)
-                    .await;
-                workloads.to_http()
+                    .await
             }
-            None => {
-                let workloads = workload_service.get_all_workloads(0, 0, &namespace).await;
-                workloads.to_http()
-            }
-        }
+            None => workload_service.get_all_workloads(0, 0, &namespace).await,
+        };
+
+        HttpResponse::build(StatusCode::OK).body(
+            serde_json::to_string(&APIResponse::<Vec<Workload>> {
+                data: workloads,
+                metadata: APIResponseMetadata::default(),
+            })
+            .unwrap_or_default(),
+        )
     }
 
     /// `patch_workload` is an asynchronous function that handle **/workload/\<namespace>/<workload_id>** route (PATCH)

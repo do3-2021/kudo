@@ -1,9 +1,9 @@
 use std::net::{Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 
-use super::filter::InstanceFilterService;
 use super::model::Instance;
 use crate::etcd::{EtcdClient, EtcdClientError};
+use crate::external_api::generic::filter::FilterService;
 use crate::external_api::workload::model::Workload;
 use crate::grpc_client::interface::{SchedulerClientInterface, SchedulerClientInterfaceError};
 use log::{debug, trace};
@@ -32,7 +32,7 @@ pub enum InstanceServiceError {
 pub struct InstanceService {
     grpc_service: SchedulerClientInterface,
     etcd_service: EtcdClient,
-    filter_service: InstanceFilterService,
+    filter_service: FilterService,
 }
 
 // `InstanceService` is a struct that is inspired from Controllers Provider Modules architectures. It is used as a service in the InstanceController. A service can use other services.
@@ -54,7 +54,7 @@ impl InstanceService {
             etcd_service: EtcdClient::new(etcd_address.to_string())
                 .await
                 .map_err(InstanceServiceError::EtcdError)?,
-            filter_service: InstanceFilterService::new(),
+            filter_service: FilterService::new(),
         })
     }
 

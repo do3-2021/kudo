@@ -115,18 +115,22 @@ impl NamespaceController {
             Err(err) => return NamespaceControllerError::NamespaceServiceError(err).into(),
         };
 
-        match pagination {
+        let namespaces = match pagination {
             Some(pagination) => {
-                let namespaces = namespace_service
+                namespace_service
                     .get_all_namespace(pagination.limit, pagination.offset)
-                    .await;
-                namespaces.to_http()
+                    .await
             }
-            None => {
-                let namespaces = namespace_service.get_all_namespace(0, 0).await;
-                namespaces.to_http()
-            }
-        }
+            None => namespace_service.get_all_namespace(0, 0).await,
+        };
+
+        HttpResponse::build(StatusCode::OK).body(
+            serde_json::to_string(&APIResponse::<Vec<Namespace>> {
+                metadata: APIResponseMetadata::default(),
+                data: namespaces,
+            })
+            .unwrap_or_default(),
+        )
     }
 
     pub async fn patch_namespace(
