@@ -5,10 +5,7 @@ use crate::external_api::{
 use actix_web::{http::StatusCode, web, HttpResponse, Responder, Scope};
 use thiserror::Error;
 
-use super::{
-    model::NodeVector,
-    service::{NodeService, NodeServiceError},
-};
+use super::service::{NodeService, NodeServiceError};
 
 use log::{debug, error};
 
@@ -98,20 +95,18 @@ impl NodeController {
             Err(err) => return NodeControllerError::NodeServiceError(err).into(),
         };
 
-        match pagination {
+        let nodes = match pagination {
             Some(pagination) => {
-                let nodes = node_service
+                node_service
                     .get_all_nodes(pagination.limit, pagination.offset)
-                    .await;
-                NodeVector::new(nodes).to_http()
+                    .await
             }
-            None => {
-                let nodes = node_service.get_all_nodes(0, 0).await;
-                NodeVector::new(nodes).to_http()
-            }
-        }
+            None => node_service.get_all_nodes(0, 0).await,
+        };
 
-        // let nodes = node_service.get_all_nodes().await;
-        // web::Json(nodes)
+        HttpResponse::build(StatusCode::OK).json(APIResponse {
+            data: nodes,
+            metadata: APIResponseMetadata::default(),
+        })
     }
 }

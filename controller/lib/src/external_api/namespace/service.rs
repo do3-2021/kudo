@@ -6,7 +6,7 @@ use serde_json;
 use std::net::SocketAddr;
 use thiserror::Error;
 
-use super::model::{Metadata, Namespace, NamespaceDTO, NamespaceVector};
+use super::model::{Metadata, Namespace, NamespaceDTO};
 
 #[derive(Debug, Error)]
 pub enum NamespaceServiceError {
@@ -55,7 +55,7 @@ impl NamespaceService {
         }
     }
 
-    pub async fn get_all_namespace(&mut self, limit: u32, offset: u32) -> NamespaceVector {
+    pub async fn get_all_namespace(&mut self, limit: u32, offset: u32) -> Vec<Namespace> {
         let mut new_vec: Vec<Namespace> = Vec::new();
         match self.etcd_service.get_all().await {
             Some(namespaces) => {
@@ -68,7 +68,7 @@ impl NamespaceService {
                 if offset > 0 {
                     match self.filter_service.offset(&new_vec, offset) {
                         Ok(namespaces) => new_vec = namespaces,
-                        Err(_) => return NamespaceVector::new(vec![]),
+                        Err(_) => return vec![],
                     }
                 }
                 if limit > 0 {
@@ -76,9 +76,9 @@ impl NamespaceService {
                 }
 
                 trace!("Namespaces found: {:?}", new_vec);
-                NamespaceVector::new(new_vec)
+                new_vec
             }
-            None => NamespaceVector::new(vec![]),
+            None => vec![],
         }
     }
 
