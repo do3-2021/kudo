@@ -24,6 +24,7 @@ pub struct ExternalAPIInterface {}
 pub struct ActixAppState {
     pub etcd_address: SocketAddr,
     pub grpc_address: String,
+    pub grpc_client_connection_max_retries: u32,
 }
 
 impl ExternalAPIInterface {
@@ -32,6 +33,7 @@ impl ExternalAPIInterface {
         num_workers: usize,
         etcd_address: SocketAddr,
         grpc_address: String,
+        grpc_client_connection_max_retries: u32,
     ) -> Result<Self, ExternalAPIInterfaceError> {
         let mut etcd_client = EtcdClient::new(etcd_address.to_string())
             .await
@@ -65,6 +67,7 @@ impl ExternalAPIInterface {
                 .app_data(web::Data::new(ActixAppState {
                     etcd_address,
                     grpc_address: grpc_address.clone(),
+                    grpc_client_connection_max_retries,
                 }))
                 .route("/health", web::get().to(HttpResponse::Ok))
                 .service(workload::controller::WorkloadController {}.services())

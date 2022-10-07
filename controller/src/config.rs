@@ -11,6 +11,8 @@ pub struct KudoControllerConfig {
 pub struct InternalAPIConfig {
     pub grpc_server_addr: SocketAddr,
     pub grpc_client_addr: String,
+    pub grpc_client_connection_max_retries: u32,
+    pub time_after_node_erased: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -18,6 +20,7 @@ pub struct ExternalAPIConfig {
     pub http_server_addr: SocketAddr,
     pub http_server_num_workers: usize,
     pub etcd_address: SocketAddr,
+    pub grpc_client_connection_max_retries: u32,
 }
 
 impl Default for KudoControllerConfig {
@@ -29,6 +32,8 @@ impl Default for KudoControllerConfig {
                     50051,
                 ),
                 grpc_client_addr: "http://127.0.0.1:50052".to_string(),
+                grpc_client_connection_max_retries: 32,
+                time_after_node_erased: 350,
             },
             external_api: ExternalAPIConfig {
                 http_server_addr: SocketAddr::new(
@@ -40,6 +45,7 @@ impl Default for KudoControllerConfig {
                     std::net::IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
                     2379,
                 ),
+                grpc_client_connection_max_retries: 32,
             },
         }
     }

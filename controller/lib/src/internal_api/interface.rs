@@ -25,16 +25,23 @@ impl InternalAPIInterface {
         address: SocketAddr,
         etcd_address: SocketAddr,
         grpc_address: String,
+        grpc_client_connection_max_retries: u32,
+        time_after_node_erased: u64,
     ) -> Result<Self, InternalAPIInterfaceError> {
         info!("Starting gRPC server listening on {}", address);
 
         tokio::spawn(async move {
             Server::builder()
                 .add_service(NodeServiceServer::new(
-                    NodeController::new(&etcd_address, &grpc_address)
-                        .await
-                        .map_err(InternalAPIInterfaceError::NodeControllerError)
-                        .unwrap(),
+                    NodeController::new(
+                        &etcd_address,
+                        &grpc_address,
+                        grpc_client_connection_max_retries,
+                        time_after_node_erased,
+                    )
+                    .await
+                    .map_err(InternalAPIInterfaceError::NodeControllerError)
+                    .unwrap(),
                 ))
                 .serve(address)
                 .await

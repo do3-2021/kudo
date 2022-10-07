@@ -1,7 +1,10 @@
-use log::{debug, trace};
+use std::time::Duration;
+
+use log::{debug, error, trace};
 use proto::scheduler::instance_service_client::InstanceServiceClient;
 use proto::scheduler::{Instance, InstanceIdentifier, InstanceStatus};
 use thiserror::Error;
+use tokio::time;
 use tonic::transport::{Channel, Error};
 use tonic::{Request, Response, Status, Streaming};
 
@@ -20,17 +23,36 @@ pub struct SchedulerClientInterface {
 impl SchedulerClientInterface {
     pub async fn new(
         instance_client_address: String,
+        max_retries: u32,
     ) -> Result<Self, SchedulerClientInterfaceError> {
         debug!(
             "Starting gRPC client for scheduler Instance Service on {}",
             instance_client_address,
         );
 
-        let instance_client = InstanceServiceClient::connect(instance_client_address)
-            .await
-            .map_err(SchedulerClientInterfaceError::ConnectionError)?;
+        let mut retries: u32 = 0;
+        let mut cooldown = Duration::from_secs(1);
 
-        Ok(Self { instance_client })
+        loop {
+            match InstanceServiceClient::connect(instance_client_address.clone()).await {
+                Ok(instance_client) => {
+                    debug!("Connected to scheduler Instance Service");
+                    return Ok(SchedulerClientInterface { instance_client });
+                }
+                Err(e) => {
+                    if retries >= max_retries {
+                        return Err(SchedulerClientInterfaceError::ConnectionError(e));
+                    }
+                    retries += 1;
+                    error!(
+                        "Failed to connect to scheduler Instance Service, retrying in {} seconds",
+                        cooldown.as_secs()
+                    );
+                    time::sleep(cooldown).await;
+                    cooldown *= 2;
+                }
+            }
+        }
     }
 
     pub async fn create_instance(

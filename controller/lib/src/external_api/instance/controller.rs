@@ -89,13 +89,18 @@ impl InstanceController {
         body: web::Json<InstanceDTO>,
         data: web::Data<ActixAppState>,
     ) -> impl Responder {
-        let instance_service =
-            match InstanceService::new(&data.grpc_address, &data.etcd_address).await {
-                Ok(service) => service,
-                Err(err) => {
-                    return InstanceControllerError::InstanceServiceError(err).into();
-                }
-            };
+        let instance_service = match InstanceService::new(
+            &data.grpc_address,
+            &data.etcd_address,
+            data.grpc_client_connection_max_retries,
+        )
+        .await
+        {
+            Ok(service) => service,
+            Err(err) => {
+                return InstanceControllerError::InstanceServiceError(err).into();
+            }
+        };
 
         let mut workload_service = match WorkloadService::new(&data.etcd_address).await {
             Ok(service) => service,
@@ -142,13 +147,18 @@ impl InstanceController {
         params: web::Path<(String, String)>,
         data: web::Data<ActixAppState>,
     ) -> impl Responder {
-        let mut instance_service =
-            match InstanceService::new(&data.grpc_address, &data.etcd_address).await {
-                Ok(service) => service,
-                Err(err) => {
-                    return InstanceControllerError::InstanceServiceError(err).into();
-                }
-            };
+        let mut instance_service = match InstanceService::new(
+            &data.grpc_address,
+            &data.etcd_address,
+            data.grpc_client_connection_max_retries,
+        )
+        .await
+        {
+            Ok(service) => service,
+            Err(err) => {
+                return InstanceControllerError::InstanceServiceError(err).into();
+            }
+        };
 
         let (namespace, name) = params.into_inner();
         match instance_service
@@ -183,13 +193,18 @@ impl InstanceController {
         params: web::Path<(String, String)>,
         data: web::Data<ActixAppState>,
     ) -> impl Responder {
-        let mut instance_service =
-            match InstanceService::new(&data.grpc_address, &data.etcd_address).await {
-                Ok(service) => service,
-                Err(err) => {
-                    return InstanceControllerError::InstanceServiceError(err).into();
-                }
-            };
+        let mut instance_service = match InstanceService::new(
+            &data.grpc_address,
+            &data.etcd_address,
+            data.grpc_client_connection_max_retries,
+        )
+        .await
+        {
+            Ok(service) => service,
+            Err(err) => {
+                return InstanceControllerError::InstanceServiceError(err).into();
+            }
+        };
 
         let (namespace, name) = params.into_inner();
         match instance_service
@@ -216,13 +231,18 @@ impl InstanceController {
         pagination: Option<web::Query<Pagination>>,
         data: web::Data<ActixAppState>,
     ) -> impl Responder {
-        let mut instance_service =
-            match InstanceService::new(&data.grpc_address, &data.etcd_address).await {
-                Ok(service) => service,
-                Err(err) => {
-                    return InstanceControllerError::InstanceServiceError(err).into();
-                }
-            };
+        let mut instance_service = match InstanceService::new(
+            &data.grpc_address,
+            &data.etcd_address,
+            data.grpc_client_connection_max_retries,
+        )
+        .await
+        {
+            Ok(service) => service,
+            Err(err) => {
+                return InstanceControllerError::InstanceServiceError(err).into();
+            }
+        };
 
         let instances = match pagination {
             Some(pagination) => {

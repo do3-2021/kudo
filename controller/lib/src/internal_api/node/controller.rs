@@ -20,19 +20,27 @@ pub enum NodeControllerError {
 /// * `node_service`: An instance of the NodeService that will implement the logic.
 pub struct NodeController {
     node_service: Arc<Mutex<NodeService>>,
+    time_after_node_erased: u64,
 }
 
 impl NodeController {
     pub async fn new(
         etcd_address: &SocketAddr,
         grpc_address: &str,
+        grpc_client_connection_max_retries: u32,
+        time_after_node_erased: u64,
     ) -> Result<Self, NodeControllerError> {
         Ok(NodeController {
             node_service: Arc::new(Mutex::new(
-                NodeService::new(etcd_address, grpc_address)
-                    .await
-                    .map_err(NodeControllerError::NodeServiceError)?,
+                NodeService::new(
+                    etcd_address,
+                    grpc_address,
+                    grpc_client_connection_max_retries,
+                )
+                .await
+                .map_err(NodeControllerError::NodeServiceError)?,
             )),
+            time_after_node_erased,
         })
     }
 }
@@ -61,7 +69,7 @@ impl proto::controller::node_service_server::NodeService for NodeController {
             .clone()
             .lock()
             .await
-            .update_node_status(stream)
+            .update_node_status(stream, self.time_after_node_erased)
             .await
             .map_err(|err| {
                 error!("Error updating node status: {}", err);

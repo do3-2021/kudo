@@ -22,6 +22,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         config.internal_api.grpc_server_addr,
         config.external_api.etcd_address,
         config.internal_api.grpc_client_addr.clone(),
+        config.internal_api.grpc_client_connection_max_retries,
+        config.internal_api.time_after_node_erased,
     );
 
     info!("Starting External API");
@@ -32,6 +34,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         config.external_api.http_server_num_workers,
         config.external_api.etcd_address,
         config.internal_api.grpc_client_addr,
+        config.internal_api.grpc_client_connection_max_retries,
     );
 
     let join = tokio::join!(internal_api, external_api);

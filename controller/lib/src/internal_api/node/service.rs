@@ -36,15 +36,20 @@ impl NodeService {
     pub async fn new(
         etcd_address: &SocketAddr,
         grpc_address: &str,
+        grpc_client_connection_max_retries: u32,
     ) -> Result<Self, NodeServiceError> {
         Ok(NodeService {
             etcd_interface: EtcdClient::new(etcd_address.to_string())
                 .await
                 .map_err(NodeServiceError::EtcdError)?,
             instance_service: Arc::new(Mutex::new(
-                InstanceService::new(grpc_address, etcd_address)
-                    .await
-                    .map_err(NodeServiceError::InstanceServiceError)?,
+                InstanceService::new(
+                    grpc_address,
+                    etcd_address,
+                    grpc_client_connection_max_retries,
+                )
+                .await
+                .map_err(NodeServiceError::InstanceServiceError)?,
             )),
         })
     }
@@ -63,6 +68,7 @@ impl NodeService {
     pub async fn update_node_status(
         &mut self,
         mut stream: Streaming<proto::controller::NodeStatus>,
+        time_after_node_erased: u64,
     ) -> Result<String, NodeServiceError> {
         let mut last_instances: Vec<Instance> = vec![];
         let mut node_id = String::new();
@@ -107,8 +113,7 @@ impl NodeService {
             InstanceService::schedule_instance(self.instance_service.clone(), instance)
         }
 
-        //Delete Node after 5 min
-        time::sleep(Duration::from_secs(300)).await;
+        time::sleep(Duration::from_secs(time_after_node_erased)).await;
         self.etcd_interface.delete(&node_id).await;
 
         Ok(node_id)
