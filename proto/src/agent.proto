@@ -53,6 +53,12 @@ message Port {
   int32 destination = 2;
 }
 
+// Represents node network infos
+message Ips {
+  string clusterIp = 1;
+  string publicIp = 2;
+}
+
 // Represent the resource usage of a node or a workload 
 message ResourceSummary {
   uint64 cpu = 1;
@@ -69,6 +75,11 @@ message Resource {
 message SignalInstruction {
   Instance instance = 1;
   Signal signal = 2;
+}
+
+service NodeService {
+  rpc join (Ips) returns (google.protobuf.Empty) {}
+  rpc leave (Ips) returns (google.protobuf.Empty) {}
 }
 
 service InstanceService {
